@@ -14,13 +14,14 @@ import javafx.scene.paint.Color;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
  * Created by eyal8_000 on 16/06/2017.
  */
-public class MazeDisplayer extends Canvas {
+public class MazeDisplayer extends Canvas implements Serializable{
 
     private int[][] maze;
     private int characterPositionRow = 1;
@@ -35,6 +36,26 @@ public class MazeDisplayer extends Canvas {
         characterPositionRow = row;
         characterPositionColumn = column;
         redraw();
+    }
+
+    public int[][] getMaze() {
+        return maze;
+    }
+
+    public void setCharacterPositionRow(int characterPositionRow) {
+        this.characterPositionRow = characterPositionRow;
+    }
+
+    public void setCharacterPositionColumn(int characterPositionColumn) {
+        this.characterPositionColumn = characterPositionColumn;
+    }
+
+    public StringProperty imageFileNameWallProperty() {
+        return ImageFileNameWall;
+    }
+
+    public StringProperty imageFileNameCharacterProperty() {
+        return ImageFileNameCharacter;
     }
 
     public int getCharacterPositionRow() {
