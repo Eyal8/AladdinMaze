@@ -1,9 +1,17 @@
 .root{
-    -fx-background-color: bisque;
+    -fx-background-color: powderblue;
+}
+
+#board{
+    -fx-background-image: url("http://wallpapercave.com/wp/WXvIo5G.jpg");
+    -fx-background-repeat: stretch;
+    -fx-background-size: 1400 800;
+    -fx-background-position: center center;
+    -fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0);
 }
 
 Button {
-    -fx-text-fill: white;
+    -fx-text-fill: blue;
     -fx-font-family: "Arial Narrow";
     -fx-font-weight: bold;
     -fx-background-color: linear-gradient(#61a2b1, #2A5058);

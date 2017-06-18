@@ -1,38 +1,83 @@
 package View;
 
+import ViewModel.MyViewModel;
+import algorithms.mazeGenerators.Maze;
+import algorithms.mazeGenerators.Position;
+import algorithms.search.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.event.EventHandler;
-import javafx.fxml.Initializable;
+import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by eyal8_000 on 16/06/2017.
  */
-public class MazeDisplayer extends Canvas implements Serializable{
+public class MazeDisplayer extends Canvas implements Serializable, Observer {
 
+    algorithms.mazeGenerators.Position startPosition;
+    algorithms.mazeGenerators.Position goalPosition;
+    MyViewModel m_vm;
     private int[][] maze;
-    private int characterPositionRow = 1;
-    private int characterPositionColumn = 1;
+    private int characterPositionRow;
+    private int characterPositionColumn;
+    private boolean solve = false;
+
+    public boolean isSolve() {
+        return solve;
+    }
+
+    public void setSolve(boolean solve) {
+        this.solve = solve;
+    }
 
     public void setMaze(int[][] maze) {
         this.maze = maze;
         redraw();
     }
 
+    public algorithms.mazeGenerators.Position getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(algorithms.mazeGenerators.Position startPosition) {
+        this.startPosition = startPosition;
+    }
+
+    public algorithms.mazeGenerators.Position getGoalPosition() {
+        return goalPosition;
+    }
+
+    public void setGoalPosition(algorithms.mazeGenerators.Position goalPosition) {
+        this.goalPosition = goalPosition;
+    }
+
+    public MyViewModel getM_vm() {
+        return m_vm;
+    }
+
+    public void setM_vm(MyViewModel m_vm) {
+        this.m_vm = m_vm;
+    }
+
     public void setCharacterPosition(int row, int column) {
+        if(goalPosition.getRowIndex() == row && goalPosition.getColumnIndex() == column)
+        {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Who is you?");
+            alert.setHeaderText("We are the champions!!!");
+            alert.setContentText("You found the caramel!");
+
+            alert.showAndWait();
+        }
         characterPositionRow = row;
         characterPositionColumn = column;
         redraw();
@@ -76,16 +121,17 @@ public class MazeDisplayer extends Canvas implements Serializable{
             try {
                 Image wallImage = new Image(new FileInputStream(ImageFileNameWall.get()));
                 Image characterImage = new Image(new FileInputStream(ImageFileNameCharacter.get()));
-
+                Image goalImage = new Image(new FileInputStream(ImageFileNameGoal.get()));
                 GraphicsContext gc = getGraphicsContext2D();
                 gc.clearRect(0, 0, getWidth(), getHeight());
 
                 //Draw Maze
+
                 for (int i = 0; i < maze.length; i++) {
                     for (int j = 0; j < maze[i].length; j++) {
                         if (maze[i][j] == 1) {
                             //gc.fillRect(i * cellHeight, j * cellWidth, cellHeight, cellWidth);
-                            gc.drawImage(wallImage, i * cellHeight, j * cellWidth, cellHeight, cellWidth);
+                            gc.drawImage(wallImage, j * cellHeight, i * cellWidth, cellHeight, cellWidth);
                         }
                     }
                 }
@@ -93,6 +139,31 @@ public class MazeDisplayer extends Canvas implements Serializable{
                 //Draw Character
                 //gc.setFill(Color.RED);
                 //gc.fillOval(characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
+                if(isSolve())
+                {
+                    ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
+                    Maze m = new Maze(maze);
+                    m.setStart(new Position(characterPositionRow, characterPositionColumn));
+                    m.setGoal(goalPosition);
+                    ISearchable searchableMaze = new SearchableMaze(m);
+                    Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
+                    try {
+                        Image solveImage = new Image(new FileInputStream(getImageFileNameSolve()));
+                        for (AState astate :solution.getSolutionPath()) {
+                            int comma = astate.getState().indexOf(44);
+                            int row = Integer.parseInt(astate.getState().substring(1, comma));
+                            int col = Integer.parseInt(astate.getState().substring(comma + 1, astate.getState().length() - 1));
+                            gc.drawImage(solveImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
+
+                        }
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        System.out.println("FileNotFoundException");
+                    }
+
+                }
+                gc.drawImage(goalImage, goalPosition.getColumnIndex() * cellHeight, goalPosition.getRowIndex() * cellWidth, cellHeight, cellWidth);
                 gc.drawImage(characterImage, characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
             } catch (FileNotFoundException e) {
                 //e.printStackTrace();
@@ -103,6 +174,24 @@ public class MazeDisplayer extends Canvas implements Serializable{
     //region Properties
     private StringProperty ImageFileNameWall = new SimpleStringProperty();
     private StringProperty ImageFileNameCharacter = new SimpleStringProperty();
+    private StringProperty ImageFileNameGoal = new SimpleStringProperty();
+    private StringProperty ImageFileNameSolve = new SimpleStringProperty();
+
+    public String getImageFileNameSolve() {
+        return ImageFileNameSolve.get();
+    }
+
+    public void setImageFileNameSolve(String imageFileNameSolve) {
+        this.ImageFileNameSolve.set(imageFileNameSolve);
+    }
+
+    public String getImageFileNameGoal() {
+        return ImageFileNameGoal.get();
+    }
+
+    public void setImageFileNameGoal(String imageFileNameGoal) {
+        this.ImageFileNameGoal.set(imageFileNameGoal);
+    }
 
     public String getImageFileNameWall() {
         return ImageFileNameWall.get();
@@ -118,6 +207,13 @@ public class MazeDisplayer extends Canvas implements Serializable{
 
     public void setImageFileNameCharacter(String imageFileNameCharacter) {
         this.ImageFileNameCharacter.set(imageFileNameCharacter);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        MazeDisplayer md = (MazeDisplayer) arg;
+        characterPositionRow = md.getCharacterPositionRow();
+        characterPositionColumn = md.getCharacterPositionColumn();
     }
     //endregion
 
