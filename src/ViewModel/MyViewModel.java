@@ -1,5 +1,7 @@
 package ViewModel;
 
+import Model.IModel;
+import Model.MyModel;
 import View.MazeDisplayer;
 import algorithms.mazeGenerators.IMazeGenerator;
 import algorithms.mazeGenerators.Maze;
@@ -20,106 +22,39 @@ import javafx.stage.FileChooser;
 
 import java.io.*;
 import java.util.Observable;
+import java.util.Observer;
 
-public class MyViewModel extends Observable {
+public class MyViewModel extends Observable implements Observer {
+
+    public IModel model;
 
     @FXML
-    public MazeDisplayer mazeDisplayer;
-    public javafx.scene.control.TextField txtfld_rowsNum;
-    public javafx.scene.control.TextField txtfld_columnsNum;
-    public javafx.scene.control.Button solve_button;
-    public  javafx.scene.control.Label Char_row;
-    public  javafx.scene.control.Label Char_column;
+
 
     //region String Property for Binding
     public StringProperty CharacterRow = new SimpleStringProperty();
     public StringProperty CharacterColumn = new SimpleStringProperty();
 
-    public String getCharacterRow() {
-        return (mazeDisplayer!= null) ? mazeDisplayer.getCharacterPositionRow() + "" : "1";
+
+    public MyViewModel(MyModel model) {
+        this.model = model;
     }
 
-    public String getCharacterColumn() {
-        return (mazeDisplayer!= null) ? mazeDisplayer.getCharacterPositionColumn() + "" : "1";
+    public int[][] getBoard() {
+        return model.getBoard();
     }
 
-    public int[][] getNewMaze(int height, int width) {
-        IMazeGenerator mazeGenerator = new MyMazeGenerator();
-        Maze maze = mazeGenerator.generate(height,width);
-       // mazeDisplayer.setMaze(maze.getMaze());
-        mazeDisplayer.setStartPosition(maze.getStartPosition());
-        mazeDisplayer.setGoalPosition(maze.getGoalPosition());
-        mazeDisplayer.setCharacterPositionColumn(mazeDisplayer.getStartPosition().getColumnIndex());
-        mazeDisplayer.setCharacterPositionRow(mazeDisplayer.getStartPosition().getRowIndex());
-        return maze.getMaze();
+    public void generateMaze(int rows, int columns) {
+        model.generateMaze(rows, columns);
     }
 
-    public void generateMaze() {
-        solve_button.setDisable(false);
-        int rows = Integer.valueOf(txtfld_rowsNum.getText());
-        int columns = Integer.valueOf(txtfld_columnsNum.getText());
-        if(rows<10 || columns<10)
-        {
-            showAlert("The maze is too small! what are you child?");
-
-        }
-        this.mazeDisplayer.setMaze(getNewMaze(rows,columns));
-        mazeDisplayer.requestFocus();
-        //mazeDisplayer.addEventFilter(MouseEvent.MOUSE_CLICKED, (event -> mazeDisplayer.requestFocus()));
+    public void KeyPressed(KeyCode keyCode) {
+        model.KeyPressed(keyCode);
     }
-
-    private void showAlert(String alertMessage) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setContentText(alertMessage);
-        alert.show();
-    }
-
-    public void solveMaze(ActionEvent actionEvent) {
-
-        showAlert("Solving maze..");
-        mazeDisplayer.setSolve(true);
-        mazeDisplayer.redraw();
-        mazeDisplayer.setSolve(false);
-
-    }
-
-    public void KeyPressed(KeyEvent keyEvent) {
-
-        int characterRow = mazeDisplayer.getCharacterPositionRow();
-        int characterColumn = mazeDisplayer.getCharacterPositionColumn();
-        if (keyEvent.getCode() == KeyCode.UP) {
-            if(mazeDisplayer.getMaze()[characterRow - 1][characterColumn] == 0)
-                mazeDisplayer.setCharacterPosition(characterRow - 1, characterColumn);
-          //  else
-           //     mazeDisplayer.setCharacterPosition(characterRow, characterColumn);
-        }
-        if (keyEvent.getCode() == KeyCode.DOWN) {
-            if(mazeDisplayer.getMaze()[characterRow + 1][characterColumn] == 0)
-            mazeDisplayer.setCharacterPosition(characterRow + 1, characterColumn);
-          //  else
-           //     mazeDisplayer.setCharacterPosition(characterRow, characterColumn);
-        }
-        if (keyEvent.getCode() == KeyCode.RIGHT) {
-            if(mazeDisplayer.getMaze()[characterRow][characterColumn + 1] == 0)
-                mazeDisplayer.setCharacterPosition(characterRow, characterColumn + 1);
-           // else
-          //      mazeDisplayer.setCharacterPosition(characterRow, characterColumn);
-        }
-        if (keyEvent.getCode() == KeyCode.LEFT) {
-            if(mazeDisplayer.getMaze()[characterRow][characterColumn - 1] == 0)
-                mazeDisplayer.setCharacterPosition(characterRow, characterColumn - 1);
-           // else
-            //    mazeDisplayer.setCharacterPosition(characterRow, characterColumn);
-        }
-        notifyObservers(mazeDisplayer);
-        keyEvent.consume();
-    }
-
-
 
     //endregion
 
-    public void setRows(KeyEvent keyEvent)
+ /*   public void setRows(KeyCode keyCode)
     {
         if(keyEvent.getCode() == KeyCode.ENTER) {
             int rows = Integer.valueOf(txtfld_rowsNum.getText());
@@ -150,25 +85,9 @@ public class MyViewModel extends Observable {
             keyEvent.consume();
             //mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
         }
-    }
-    public void zooming(ScrollEvent se)
-    {
-        if(se.isControlDown() && se.getDeltaY() < 0)
-        {
-            mazeDisplayer.setHeight(mazeDisplayer.getHeight() + se.getDeltaY());
-            mazeDisplayer.setWidth(mazeDisplayer.getWidth() + se.getDeltaY());
-            mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
-        else if(se.isControlDown() && se.getDeltaY() > 0)
-        {
-            mazeDisplayer.setHeight(mazeDisplayer.getHeight() + se.getDeltaY());
-            mazeDisplayer.setWidth(mazeDisplayer.getWidth() + se.getDeltaY());
-            mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
-        se.consume();
-    }
+    }*/
 
-    public void load()
+      /* public void load()
     {
         FileChooser fc = new FileChooser();
         fc.setTitle("load maze");
@@ -218,7 +137,7 @@ public class MyViewModel extends Observable {
         } catch (IOException ex) {
             System.out.println("IOException");
         }
-    }
+    }*/
 
     public void exit(){
         Platform.exit();
@@ -243,5 +162,41 @@ public class MyViewModel extends Observable {
         // alert.setContentText("second, the algorithm to solve the maze the Best first search algorithm");
 
         alert.showAndWait();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if(o == model)
+        {
+            setChanged();
+            notifyObservers();
+        }
+    }
+
+    //region String Property for Binding
+
+
+    public String getCharacterRow() {
+        return CharacterRow.get();
+    }
+
+    public StringProperty characterRowProperty() {
+        return CharacterRow;
+    }
+
+    public String getCharacterColumn() {
+        return CharacterColumn.get();
+    }
+
+    public StringProperty characterColumnProperty() {
+        return CharacterColumn;
+    }
+
+    public int getCharacterPositionRow() {
+        return model.getCharacterPositionRow();
+    }
+
+    public int getCharacterPositionColumn() {
+        return  model.getCharacterPositionColumn();
     }
 }
