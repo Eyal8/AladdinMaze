@@ -1,5 +1,8 @@
 package Model;
 
+import Server.Server;
+import Server.ServerStrategyGenerateMaze;
+import Server.ServerStrategySolveSearchProblem;
 import View.MazeDisplayer;
 import algorithms.mazeGenerators.IMazeGenerator;
 import algorithms.mazeGenerators.Maze;
@@ -13,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
+import test.RunCommunicateWithServers;
 
 import java.io.*;
 import java.util.Observable;
@@ -28,18 +32,23 @@ public class MyModel extends Observable implements IModel {
     private ExecutorService threadPool = Executors.newCachedThreadPool();
     private int characterPositionRow;
     private int characterPositionColumn;
-
+    private Server mazeGeneratingServer;
+    private Server solveSearchProblemServer;
     public  MyModel()
     {
-        //servers
+        startServers();
     }
 
     public void startServers() {
-
+        mazeGeneratingServer = new Server(5400, 1000, new ServerStrategyGenerateMaze());
+        solveSearchProblemServer = new Server(5401, 1000, new ServerStrategySolveSearchProblem());
+        solveSearchProblemServer.start();
+        mazeGeneratingServer.start();
     }
 
     public void stopServers() {
-
+        mazeGeneratingServer.stop();
+        solveSearchProblemServer.stop();
     }
 
     @Override

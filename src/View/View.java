@@ -46,8 +46,6 @@ public class View implements Observer, IView {
         }
         else
             viewModel.generateMaze(rows, columns);
-        mazeDisplayer.setMaze(viewModel.getBoard());
-        mazeDisplayer.requestFocus();
     }
 
     private void showAlert(String alertMessage) {
@@ -73,6 +71,7 @@ public class View implements Observer, IView {
     public void update(Observable o, Object arg) {
         if(o == viewModel)
         {
+            mazeDisplayer.setMaze(viewModel.getBoard());
             displayMaze(viewModel.getBoard());
             newFile.setDisable(false);
             solve_button.setDisable(false);
@@ -82,7 +81,7 @@ public class View implements Observer, IView {
 
     @Override
     public void displayMaze(int[][] maze) {
-        mazeDisplayer.setMaze(maze);
+       // mazeDisplayer.setMaze(maze);
         int characterPositionRow = viewModel.getCharacterPositionRow();
         int characterPositionColumn = viewModel.getCharacterPositionColumn();
         mazeDisplayer.setCharacterPosition(characterPositionRow, characterPositionColumn);
