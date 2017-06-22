@@ -36,12 +36,11 @@ public class MyModel extends Observable implements IModel {
     private Server solveSearchProblemServer;
     public  MyModel()
     {
-        startServers();
-    }
+        mazeGeneratingServer = new Server(5400, 1000, new ServerStrategyGenerateMaze());
+        solveSearchProblemServer = new Server(5401, 1000, new ServerStrategySolveSearchProblem());    }
 
     public void startServers() {
-        mazeGeneratingServer = new Server(5400, 1000, new ServerStrategyGenerateMaze());
-        solveSearchProblemServer = new Server(5401, 1000, new ServerStrategySolveSearchProblem());
+
         solveSearchProblemServer.start();
         mazeGeneratingServer.start();
     }

@@ -1,6 +1,13 @@
 package View;
 
+import Client.Client;
+import Client.IClientStrategy;
+import IO.MyDecompressorInputStream;
 import ViewModel.MyViewModel;
+import algorithms.mazeGenerators.Maze;
+import algorithms.mazeGenerators.MyMazeGenerator;
+import algorithms.search.AState;
+import algorithms.search.Solution;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,7 +21,10 @@ import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -37,6 +47,32 @@ public class View implements Observer, IView {
     public void generateMaze() {
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
+        try {
+            Client client = new Client(InetAddress.getLocalHost(), 5400, new IClientStrategy() {
+                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
+                    try {
+                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
+                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
+                        toServer.flush();
+                        int[] mazeDimensions = new int[]{rows, columns};
+                        toServer.writeObject(mazeDimensions);
+                        toServer.flush();
+                        byte[] compressedMaze = (byte[])((byte[])fromServer.readObject());
+                        InputStream is = new MyDecompressorInputStream(new ByteArrayInputStream(compressedMaze));
+                        byte[] decompressedMaze = new byte[2506];
+                        is.read(decompressedMaze);
+                        Maze maze = new Maze(decompressedMaze);
+                        maze.print();
+                    } catch (Exception var10) {
+                        var10.printStackTrace();
+                    }
+
+                }
+            });
+            client.communicateWithServer();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         newFile.setDisable(true);
         solve_button.setDisable(false);
         if(rows<10 || columns<10)
@@ -59,7 +95,37 @@ public class View implements Observer, IView {
     }
 
     public void solveMaze(ActionEvent actionEvent) {
+        int rows = Integer.valueOf(txtfld_rowsNum.getText());
+        int columns = Integer.valueOf(txtfld_columnsNum.getText());
+        try {
+            Client client = new Client(InetAddress.getLocalHost(), 5401, new IClientStrategy() {
+                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
+                    try {
+                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
+                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
+                        toServer.flush();
+                        MyMazeGenerator mg = new MyMazeGenerator();
+                        Maze maze = mg.generate(rows, columns);
+                        maze.print();
+                        toServer.writeObject(maze);
+                        toServer.flush();
+                        Solution mazeSolution = (Solution)fromServer.readObject();
+                        System.out.println(String.format("Solution steps: %s", new Object[]{mazeSolution}));
+                        ArrayList<AState> mazeSolutionSteps = mazeSolution.getSolutionPath();
 
+                        for(int i = 0; i < mazeSolutionSteps.size(); ++i) {
+                            System.out.println(String.format("%s. %s", new Object[]{Integer.valueOf(i), ((AState)mazeSolutionSteps.get(i)).toString()}));
+                        }
+                    } catch (Exception var10) {
+                        var10.printStackTrace();
+                    }
+
+                }
+            });
+            client.communicateWithServer();
+        } catch (UnknownHostException var1) {
+            var1.printStackTrace();
+        }
         showAlert("Solving maze..");
         mazeDisplayer.setSolve(true);
         mazeDisplayer.redraw();
