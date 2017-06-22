@@ -1,5 +1,6 @@
 package Model;
 
+import algorithms.mazeGenerators.Position;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -14,8 +15,10 @@ public interface IModel {
     public void KeyPressed(KeyCode keyCode);
 //    public void load();
   //  public void save();
+    public void exit();
     public int getCharacterPositionRow();
     public int getCharacterPositionColumn();
+    public Position getGoalPosition();
 
 
-    }
+}

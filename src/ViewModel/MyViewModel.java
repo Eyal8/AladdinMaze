@@ -6,6 +6,7 @@ import View.MazeDisplayer;
 import algorithms.mazeGenerators.IMazeGenerator;
 import algorithms.mazeGenerators.Maze;
 import algorithms.mazeGenerators.MyMazeGenerator;
+import algorithms.mazeGenerators.Position;
 import algorithms.search.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -139,11 +140,11 @@ public class MyViewModel extends Observable implements Observer {
         }
     }*/
 
-    public void exit(){
-        Platform.exit();
+    public void exit() {
+        model.exit();
     }
 
-    public void aboutTheProgrammers(){
+    public void aboutTheProgrammers() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Who are we?");
         alert.setHeaderText("information about us");
@@ -151,7 +152,8 @@ public class MyViewModel extends Observable implements Observer {
 
         alert.showAndWait();
     }
-    public void aboutTheAlgorithms(){
+
+    public void aboutTheAlgorithms() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Algorithms");
         alert.setHeaderText("Information about the algorithms used in this game");
@@ -166,8 +168,7 @@ public class MyViewModel extends Observable implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if(o == model)
-        {
+        if (o == model) {
             setChanged();
             notifyObservers();
         }
@@ -197,6 +198,9 @@ public class MyViewModel extends Observable implements Observer {
     }
 
     public int getCharacterPositionColumn() {
-        return  model.getCharacterPositionColumn();
+        return model.getCharacterPositionColumn();
     }
+
+    public Position getGoalPosition(){return model.getGoalPosition();}
+
 }

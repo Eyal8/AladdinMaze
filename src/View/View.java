@@ -18,6 +18,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
 import java.io.*;
@@ -33,48 +34,22 @@ import java.util.Observer;
  */
 public class View implements Observer, IView {
 
-    private MyViewModel viewModel;
-    private MazeDisplayer mazeDisplayer;
     @FXML
     public javafx.scene.control.TextField txtfld_rowsNum;
+    private MyViewModel viewModel;
+    public MazeDisplayer mazeDisplayer;
     public javafx.scene.control.TextField txtfld_columnsNum;
     public javafx.scene.control.Button solve_button;
     public  javafx.scene.control.Label Char_row;
     public  javafx.scene.control.Label Char_column;
     public  javafx.scene.control.MenuItem newFile;
-
     //public void setViewModel
     public void generateMaze() {
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
-        try {
-            Client client = new Client(InetAddress.getLocalHost(), 5400, new IClientStrategy() {
-                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
-                    try {
-                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
-                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
-                        toServer.flush();
-                        int[] mazeDimensions = new int[]{rows, columns};
-                        toServer.writeObject(mazeDimensions);
-                        toServer.flush();
-                        byte[] compressedMaze = (byte[])((byte[])fromServer.readObject());
-                        InputStream is = new MyDecompressorInputStream(new ByteArrayInputStream(compressedMaze));
-                        byte[] decompressedMaze = new byte[2506];
-                        is.read(decompressedMaze);
-                        Maze maze = new Maze(decompressedMaze);
-                        maze.print();
-                    } catch (Exception var10) {
-                        var10.printStackTrace();
-                    }
 
-                }
-            });
-            client.communicateWithServer();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
         newFile.setDisable(true);
-        solve_button.setDisable(false);
+        solve_button.setDisable(true);
         if(rows<10 || columns<10)
         {
             showAlert("Too small dimensions - generate default 10X10 maze...");
@@ -88,6 +63,7 @@ public class View implements Observer, IView {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(alertMessage);
         alert.show();
+        mazeDisplayer.requestFocus();
     }
     public void KeyPressed(KeyEvent keyEvent) {
         viewModel.KeyPressed(keyEvent.getCode());
@@ -137,7 +113,7 @@ public class View implements Observer, IView {
     public void update(Observable o, Object arg) {
         if(o == viewModel)
         {
-            mazeDisplayer.setMaze(viewModel.getBoard());
+           // mazeDisplayer.setMaze(viewModel.getBoard());
             displayMaze(viewModel.getBoard());
             newFile.setDisable(false);
             solve_button.setDisable(false);
@@ -147,7 +123,8 @@ public class View implements Observer, IView {
 
     @Override
     public void displayMaze(int[][] maze) {
-       // mazeDisplayer.setMaze(maze);
+        mazeDisplayer.setGoalPosition(viewModel.getGoalPosition());
+        mazeDisplayer.setMaze(maze);
         int characterPositionRow = viewModel.getCharacterPositionRow();
         int characterPositionColumn = viewModel.getCharacterPositionColumn();
         mazeDisplayer.setCharacterPosition(characterPositionRow, characterPositionColumn);
@@ -179,10 +156,12 @@ public class View implements Observer, IView {
                 showAlert("The maze is too small! what are you child?");
                 viewModel.generateMaze(10, 10);
             }
-            else
+            else {
                 generateMaze();
-            keyEvent.consume();
+                mazeDisplayer.requestFocus();
+            }
         }
+        keyEvent.consume();
     }
     public void zooming(ScrollEvent se)
     {
@@ -254,6 +233,7 @@ public class View implements Observer, IView {
     }
 
     public void exit(){
+        viewModel.exit();
         Platform.exit();
     }
 
@@ -279,25 +259,36 @@ public class View implements Observer, IView {
     }
 
     public void setResizeEvent(Scene scene) {
-        long width = 0;
-        long height = 0;
+      //  long width = 0;
+       // long height = 0;
+    //   mazeDisplayer.widthProperty().bind(scene.heightProperty());
+    //   mazeDisplayer.heightProperty().bind(scene.widthProperty());
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-                System.out.println("Width: " + newSceneWidth);
+                mazeDisplayer.setHeight(newSceneWidth.doubleValue());
+              //  System.out.println("newWidth: " + newSceneWidth + "  oldWidth:  " + mazeDisplayer.getWidth() + "  oldSceneWidth  " + oldSceneWidth.doubleValue());
+              //  System.out.println();
             }
         });
         scene.heightProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-                System.out.println("Height: " + newSceneHeight);
+                mazeDisplayer.setWidth(newSceneHeight.doubleValue());
+        //        System.out.println("Height: " + newSceneHeight + "  oldHeigh  " + mazeDisplayer.getHeight() + "  oldSceneHeight  " + oldSceneHeight.doubleValue());
+        //        System.out.println();
+          //      System.out.println();
             }
         });
+        mazeDisplayer.redraw();
     }
 
     public void setViewModel(MyViewModel viewModel) {
         this.viewModel = viewModel;
         Char_column.textProperty().bind(viewModel.characterColumnProperty());
         Char_row.textProperty().bind(viewModel.characterRowProperty());
+      //  mazePane.getChildren().add(mazeDisplayer);
+       // mazeDisplayer.heightProperty().bind(mazePane.heightProperty());
+       // mazeDisplayer.widthProperty().bind(mazePane.widthProperty());
     }
 }

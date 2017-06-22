@@ -1,5 +1,7 @@
 package Model;
 
+import Client.*;
+import IO.MyDecompressorInputStream;
 import Server.Server;
 import Server.ServerStrategyGenerateMaze;
 import Server.ServerStrategySolveSearchProblem;
@@ -7,6 +9,7 @@ import View.MazeDisplayer;
 import algorithms.mazeGenerators.IMazeGenerator;
 import algorithms.mazeGenerators.Maze;
 import algorithms.mazeGenerators.MyMazeGenerator;
+import algorithms.mazeGenerators.Position;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -19,6 +22,8 @@ import javafx.stage.FileChooser;
 import test.RunCommunicateWithServers;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,19 +71,58 @@ public class MyModel extends Observable implements IModel {
 
     public void generateMaze(int rows, int columns){
       //  solve_button.setDisable(false);
-        threadPool.execute(() -> {
-            IMazeGenerator mazeGenerator = new MyMazeGenerator();
-            maze = mazeGenerator.generate(rows,columns);
+
+
+        threadPool.submit(() -> {
+            generatingMazeClient(rows, columns);
+            System.out.println("hegiaaa la Model1");
+            maze.print();
+            characterPositionRow = maze.getStartPosition().getRowIndex();
+            System.out.println("hegiaaa la Model2");
+            characterPositionColumn = maze.getStartPosition().getColumnIndex();
+            setChanged();
+            System.out.println("hegiaaa la Model3");
+            notifyObservers();
+        } );
+       /* threadPool.execute(() -> {
+            generatingMazeClient(rows, columns);
             characterPositionRow = maze.getStartPosition().getRowIndex();
             characterPositionColumn = maze.getStartPosition().getColumnIndex();
             setChanged();
             notifyObservers();
-        } );
+        } );*/
 
 
     }
 
+    private void generatingMazeClient (int rows, int columns){
+        try {
+            Client client = new Client(InetAddress.getLocalHost(), 5400, new IClientStrategy() {
+                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
+                    try {
+                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
+                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
+                        toServer.flush();
+                        int[] mazeDimensions = new int[]{rows, columns};
+                        toServer.writeObject(mazeDimensions);
+                        toServer.flush();
+                        byte[] compressedMaze = (byte[])((byte[])fromServer.readObject());
+                        InputStream is = new MyDecompressorInputStream(new ByteArrayInputStream(compressedMaze));
+                        byte[] decompressedMaze = new byte[(rows * columns) + 6];
+                        is.read(decompressedMaze);
+                        maze = new Maze(decompressedMaze);
+                        //maze.print();
+                    } catch (Exception var10) {
+                        var10.printStackTrace();
+                    }
 
+                }
+            });
+            client.communicateWithServer();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
     public void KeyPressed(KeyCode keyCode) {
         if (keyCode == KeyCode.UP) {
             if(maze.getMaze()[characterPositionRow - 1][characterPositionColumn] == 0)
@@ -156,9 +200,10 @@ public class MyModel extends Observable implements IModel {
             System.out.println("IOException");
         }
     }
-
+*/
     public void exit(){
-        Platform.exit();
+        stopServers();
+        threadPool.shutdown();
     }
 
     public void aboutTheProgrammers(){
@@ -168,7 +213,7 @@ public class MyModel extends Observable implements IModel {
         alert.setContentText("Our names are Eyal Arviv and Shani Houri and we are totaly awesome!");
 
         alert.showAndWait();
-    }*/
+    }
     public void aboutTheAlgorithms(){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Algorithms");
@@ -180,6 +225,10 @@ public class MyModel extends Observable implements IModel {
         // alert.setContentText("second, the algorithm to solve the maze the Best first search algorithm");
 
         alert.showAndWait();
+    }
+
+    public Position getGoalPosition(){
+        return maze.getGoalPosition();
     }
 
 

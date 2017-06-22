@@ -28,6 +28,7 @@ public class Main extends Application {
 
         MyModel model = new MyModel();
         model.startServers();
+       // model.generateMaze(10,10);
         MyViewModel viewModel = new MyViewModel(model);
         model.addObserver(viewModel);
         primaryStage.setTitle("My Application!");
@@ -42,12 +43,13 @@ public class Main extends Application {
         view.setViewModel(viewModel);
         viewModel.addObserver(view);
         primaryStage.show();
+      //  model.stopServers();// exit
 
         //Rise Servers
         //  mazeDisplayer.prefHeight(primaryStage.getHeight());
         //  mazeDisplayer.prefWidth(primaryStage.getWidth());
 
-     /*   SimpleDoubleProperty stageWidthProperty = new SimpleDoubleProperty(primaryStage.getWidth());
+   /*     SimpleDoubleProperty stageWidthProperty = new SimpleDoubleProperty(primaryStage.getWidth());
         SimpleDoubleProperty stageHeightProperty = new SimpleDoubleProperty(primaryStage.getHeight());
         stageHeightProperty.bind(stageWidthProperty.divide(2));
         stageHeightProperty.addListener(new ChangeListener<Number>() {
@@ -63,8 +65,8 @@ public class Main extends Application {
                 primaryStage.setWidth(newValue.doubleValue());
                 System.out.println("Stage width = " + newValue);
             }
-        });/*
-
+        });
+*/
 
 
         // animate the stage width and the scene is resized to fill the viewable area of the stage.

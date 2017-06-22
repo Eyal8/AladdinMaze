@@ -21,16 +21,20 @@ import java.util.Observer;
 /**
  * Created by eyal8_000 on 16/06/2017.
  */
-public class MazeDisplayer extends Canvas implements Serializable, Observer {
+public class MazeDisplayer extends Canvas implements Serializable {
 
-    algorithms.mazeGenerators.Position startPosition;
-    algorithms.mazeGenerators.Position goalPosition;
-    MyViewModel m_vm;
+    Position startPosition;
+    Position goalPosition;
     private int[][] maze;
     private int characterPositionRow;
     private int characterPositionColumn;
     private boolean solve = false;
 
+    public MazeDisplayer()
+    {
+        widthProperty().addListener(evt -> redraw());
+        heightProperty().addListener(evt -> redraw());
+    }
     public boolean isSolve() {
         return solve;
     }
@@ -41,31 +45,23 @@ public class MazeDisplayer extends Canvas implements Serializable, Observer {
 
     public void setMaze(int[][] maze) {
         this.maze = maze;
-        redraw();
+      //  redraw();
     }
 
-    public algorithms.mazeGenerators.Position getStartPosition() {
+    public Position getStartPosition() {
         return startPosition;
     }
 
-    public void setStartPosition(algorithms.mazeGenerators.Position startPosition) {
+    public void setStartPosition(Position startPosition) {
         this.startPosition = startPosition;
     }
 
-    public algorithms.mazeGenerators.Position getGoalPosition() {
+    public Position getGoalPosition() {
         return goalPosition;
     }
 
-    public void setGoalPosition(algorithms.mazeGenerators.Position goalPosition) {
+    public void setGoalPosition(Position goalPosition) {
         this.goalPosition = goalPosition;
-    }
-
-    public MyViewModel getM_vm() {
-        return m_vm;
-    }
-
-    public void setM_vm(MyViewModel m_vm) {
-        this.m_vm = m_vm;
     }
 
     public void setCharacterPosition(int row, int column) {
@@ -111,13 +107,33 @@ public class MazeDisplayer extends Canvas implements Serializable, Observer {
         return characterPositionColumn;
     }
 
+    @Override
+    public boolean isResizable() {
+        return true;
+    }
+
+    @Override
+    public double prefWidth(double height) {
+        return getWidth();
+    }
+
+    @Override
+    public double prefHeight(double width) {
+        return getHeight();
+    }
+
     public void redraw() {
         if (maze != null) {
             double canvasHeight = getHeight();
             double canvasWidth = getWidth();
             double cellHeight = canvasHeight / maze.length;
             double cellWidth = canvasWidth / maze[0].length;
-
+            System.out.println("canvasHeight   " + canvasHeight + "\n");
+            System.out.println("canvasWidth   " + canvasWidth+ "\n");
+            System.out.println("cellHeight   " + cellHeight+ "\n");
+            System.out.println("cellWidth   " + cellWidth+ "\n");
+            System.out.println();
+            System.out.println();
             try {
                 Image wallImage = new Image(new FileInputStream(ImageFileNameWall.get()));
                 Image characterImage = new Image(new FileInputStream(ImageFileNameCharacter.get()));
@@ -126,7 +142,6 @@ public class MazeDisplayer extends Canvas implements Serializable, Observer {
                 gc.clearRect(0, 0, getWidth(), getHeight());
 
                 //Draw Maze
-
                 for (int i = 0; i < maze.length; i++) {
                     for (int j = 0; j < maze[i].length; j++) {
                         if (maze[i][j] == 1) {
@@ -209,12 +224,6 @@ public class MazeDisplayer extends Canvas implements Serializable, Observer {
         this.ImageFileNameCharacter.set(imageFileNameCharacter);
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        MazeDisplayer md = (MazeDisplayer) arg;
-        characterPositionRow = md.getCharacterPositionRow();
-        characterPositionColumn = md.getCharacterPositionColumn();
-    }
     //endregion
 
 }
