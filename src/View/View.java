@@ -18,8 +18,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -34,22 +38,29 @@ import java.util.Observer;
  */
 public class View implements Observer, IView {
 
+    private boolean solve = false;
     @FXML
     public javafx.scene.control.TextField txtfld_rowsNum;
     private MyViewModel viewModel;
     public MazeDisplayer mazeDisplayer;
     public javafx.scene.control.TextField txtfld_columnsNum;
     public javafx.scene.control.Button solve_button;
+    public javafx.scene.control.Button hint_button;
     public  javafx.scene.control.Label Char_row;
     public  javafx.scene.control.Label Char_column;
     public  javafx.scene.control.MenuItem newFile;
+    public BorderPane board;
+    MediaPlayer mediaPlayer;
+    MediaPlayer sol;
     //public void setViewModel
     public void generateMaze() {
+        mazeDisplayer.zeroHint();
+        mediaPlayer.setVolume(0.1);
+        mediaPlayer.play();
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
 
         newFile.setDisable(true);
-        solve_button.setDisable(true);
         if(rows<10 || columns<10)
         {
             showAlert("Too small dimensions - generate default 10X10 maze...");
@@ -66,58 +77,56 @@ public class View implements Observer, IView {
         mazeDisplayer.requestFocus();
     }
     public void KeyPressed(KeyEvent keyEvent) {
+        solve = false;
+        mazeDisplayer.zeroHint();
         viewModel.KeyPressed(keyEvent.getCode());
         keyEvent.consume();
     }
 
     public void solveMaze(ActionEvent actionEvent) {
+        mazeDisplayer.zeroHint();
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
-        try {
-            Client client = new Client(InetAddress.getLocalHost(), 5401, new IClientStrategy() {
-                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
-                    try {
-                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
-                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
-                        toServer.flush();
-                        MyMazeGenerator mg = new MyMazeGenerator();
-                        Maze maze = mg.generate(rows, columns);
-                        maze.print();
-                        toServer.writeObject(maze);
-                        toServer.flush();
-                        Solution mazeSolution = (Solution)fromServer.readObject();
-                        System.out.println(String.format("Solution steps: %s", new Object[]{mazeSolution}));
-                        ArrayList<AState> mazeSolutionSteps = mazeSolution.getSolutionPath();
-
-                        for(int i = 0; i < mazeSolutionSteps.size(); ++i) {
-                            System.out.println(String.format("%s. %s", new Object[]{Integer.valueOf(i), ((AState)mazeSolutionSteps.get(i)).toString()}));
-                        }
-                    } catch (Exception var10) {
-                        var10.printStackTrace();
-                    }
-
-                }
-            });
-            client.communicateWithServer();
-        } catch (UnknownHostException var1) {
-            var1.printStackTrace();
+        if(!solve) {
+            showAlert("Solving maze..");
+            solve = true;
         }
-        showAlert("Solving maze..");
-        mazeDisplayer.setSolve(true);
-        mazeDisplayer.redraw();
-        mazeDisplayer.setSolve(false);
+        else {
+            showAlert("Hiding solution..");
+            solve = false;
+        }
+        viewModel.solveMaze(rows, columns);
         actionEvent.consume();
+       // mediaPlayer.pause();
+     //   sol.play();
+    }
 
+    public void getHint()
+    {
+        mazeDisplayer.getHint();
+        displayMaze(viewModel.getBoard());
     }
     @Override
     public void update(Observable o, Object arg) {
         if(o == viewModel)
         {
            // mazeDisplayer.setMaze(viewModel.getBoard());
-            displayMaze(viewModel.getBoard());
+           // Char_row.setText(viewModel.getCharacterRow());
+          //  Char_column.setText(viewModel.getCharacterColumn());
+            if(solve) {
+                mazeDisplayer.setSolve(true);
+                displayMaze(viewModel.getBoard());
+            }
+            else
+            {
+                mazeDisplayer.setSolve(false);
+                displayMaze(viewModel.getBoard());
+            }
             newFile.setDisable(false);
             solve_button.setDisable(false);
+            hint_button.setDisable(false);
             mazeDisplayer.requestFocus();
+           // mazeDisplayer.setSolve(false);
         }
     }
 
@@ -183,34 +192,12 @@ public class View implements Observer, IView {
     public void load()
     {
         FileChooser fc = new FileChooser();
-        fc.setTitle("load maze");
+        fc.setTitle("Load maze...");
         fc.setInitialDirectory(new File("./savedMazes"));
-        File chosen = fc.showOpenDialog(null);
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream("./savedMazes/" + chosen.getName());
-            ObjectInputStream is = new ObjectInputStream(fis);
-            mazeDisplayer = (MazeDisplayer) is.readObject();
-            generateMaze();
-            //mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-            is.close();
-            fis.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("FileNotFoundException");
-            showAlert("FileNotFoundException");
-
-        }
-        catch (IOException e)
-        {
-            System.out.println("IOException");
-            showAlert("IOException");
-        }
-        catch (ClassNotFoundException e)
-        {
-            System.out.println("ClassNotFoundException");
-            showAlert("ClassNotFoundException");
-
-        }
+        fc.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Text files",".txt"));
+        File chosen = fc.showOpenDialog((Stage) mazeDisplayer.getScene().getWindow());
+        if(chosen != null)
+            viewModel.load(chosen);
     }
 
     public void save()
@@ -218,23 +205,16 @@ public class View implements Observer, IView {
         FileChooser fc = new FileChooser();
         fc.setTitle("Saving the maze");
         fc.setInitialDirectory(new File("./savedMazes"));
-        fc.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Maze files (*.maze)", "*.maze"));
-        File chosen = fc.showSaveDialog(null);
-        try {
-            File file = new File("./savedMazes/" + chosen.getName());
-            FileOutputStream fo = new FileOutputStream(file);
-            ObjectOutputStream os = new ObjectOutputStream(fo);
-            os.writeObject(mazeDisplayer);
-            fo.close();
-            os.close();
-        } catch (IOException ex) {
-            System.out.println("IOException");
-        }
+        fc.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Text files", ".txt"));
+        File chosen = fc.showSaveDialog((Stage) mazeDisplayer.getScene().getWindow());
+        if(chosen != null)
+            viewModel.save(chosen);
     }
 
     public void exit(){
         viewModel.exit();
         Platform.exit();
+        mediaPlayer.stop();
     }
 
     public void aboutTheProgrammers(){
@@ -259,34 +239,32 @@ public class View implements Observer, IView {
     }
 
     public void setResizeEvent(Scene scene) {
-      //  long width = 0;
-       // long height = 0;
-    //   mazeDisplayer.widthProperty().bind(scene.heightProperty());
-    //   mazeDisplayer.heightProperty().bind(scene.widthProperty());
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-                mazeDisplayer.setHeight(newSceneWidth.doubleValue());
-              //  System.out.println("newWidth: " + newSceneWidth + "  oldWidth:  " + mazeDisplayer.getWidth() + "  oldSceneWidth  " + oldSceneWidth.doubleValue());
-              //  System.out.println();
+                board.setPrefWidth(newSceneWidth.longValue()*0.8);
+                mazeDisplayer.setWidth(board.getPrefWidth());
+                mazeDisplayer.redraw();
             }
         });
         scene.heightProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-                mazeDisplayer.setWidth(newSceneHeight.doubleValue());
-        //        System.out.println("Height: " + newSceneHeight + "  oldHeigh  " + mazeDisplayer.getHeight() + "  oldSceneHeight  " + oldSceneHeight.doubleValue());
-        //        System.out.println();
-          //      System.out.println();
+                board.setPrefHeight(newSceneHeight.longValue()*0.9);
+                mazeDisplayer.setHeight(board.getPrefHeight());
+                mazeDisplayer.redraw();
             }
         });
-        mazeDisplayer.redraw();
     }
 
     public void setViewModel(MyViewModel viewModel) {
         this.viewModel = viewModel;
         Char_column.textProperty().bind(viewModel.characterColumnProperty());
         Char_row.textProperty().bind(viewModel.characterRowProperty());
+        Media song = new Media("file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/aladdin-friendlikemehighquality_cutted.mp3");
+        mediaPlayer = new MediaPlayer(song);
+       // Media solveSong = new Media("file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
+      //  sol = new MediaPlayer(solveSong);
       //  mazePane.getChildren().add(mazeDisplayer);
        // mazeDisplayer.heightProperty().bind(mazePane.heightProperty());
        // mazeDisplayer.widthProperty().bind(mazePane.widthProperty());

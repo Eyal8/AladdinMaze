@@ -28,12 +28,10 @@ public class Main extends Application {
 
         MyModel model = new MyModel();
         model.startServers();
-       // model.generateMaze(10,10);
         MyViewModel viewModel = new MyViewModel(model);
         model.addObserver(viewModel);
         primaryStage.setTitle("My Application!");
         FXMLLoader fxmlLoader = new FXMLLoader();
-
         Parent root = fxmlLoader.load(getClass().getResource("View.fxml").openStream());
         Scene scene = new Scene(root, 800, 700);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());

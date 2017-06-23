@@ -29,6 +29,7 @@ public class MazeDisplayer extends Canvas implements Serializable {
     private int characterPositionRow;
     private int characterPositionColumn;
     private boolean solve = false;
+    private int hint = 0;
 
     public MazeDisplayer()
     {
@@ -48,6 +49,15 @@ public class MazeDisplayer extends Canvas implements Serializable {
       //  redraw();
     }
 
+    public void getHint()
+    {
+        hint++;
+    }
+
+    public void zeroHint()
+    {
+        hint = 0;
+    }
     public Position getStartPosition() {
         return startPosition;
     }
@@ -122,10 +132,36 @@ public class MazeDisplayer extends Canvas implements Serializable {
         return getHeight();
     }
 
+    @Override
+    public double minWidth(double height) {
+        return 10;
+    }
+
+    @Override
+    public double minHeight(double width) {
+        return 10;
+    }
+
+    @Override
+    public double maxWidth(double height) {
+        return 800;
+    }
+
+    @Override
+    public double maxHeight(double width) {
+        return 800;
+    }
+
+    @Override
+    public void resize(double width, double height) {
+        super.setHeight(height);
+        super.setWidth(width);
+        // redraw();
+    }
     public void redraw() {
         if (maze != null) {
-            double canvasHeight = getHeight();
-            double canvasWidth = getWidth();
+            double canvasHeight = getWidth();
+            double canvasWidth = getHeight();
             double cellHeight = canvasHeight / maze.length;
             double cellWidth = canvasWidth / maze[0].length;
             System.out.println("canvasHeight   " + canvasHeight + "\n");
@@ -154,16 +190,38 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 //Draw Character
                 //gc.setFill(Color.RED);
                 //gc.fillOval(characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
-                if(isSolve())
+                ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
+                Maze m = new Maze(maze);
+                m.setStart(new Position(characterPositionRow, characterPositionColumn));
+                m.setGoal(goalPosition);
+                ISearchable searchableMaze = new SearchableMaze(m);
+                Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
+                if(hint > 0)
                 {
-                    ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
-                    Maze m = new Maze(maze);
-                    m.setStart(new Position(characterPositionRow, characterPositionColumn));
-                    m.setGoal(goalPosition);
-                    ISearchable searchableMaze = new SearchableMaze(m);
-                    Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
                     try {
-                        Image solveImage = new Image(new FileInputStream(getImageFileNameSolve()));
+                        Image hintImage = new Image(new FileInputStream(ImageFileNameHint.get()));
+                        int x = 0;
+                        if(hint + 1 < solution.getSolutionPath().size())
+                            x = hint + 1;
+                        else
+                            x = solution.getSolutionPath().size();
+                        for(int i = 1; i < x; i++){
+                            AState astate = solution.getSolutionPath().get(i);
+                            int comma = astate.getState().indexOf(44);
+                            int row = Integer.parseInt(astate.getState().substring(1, comma));
+                            int col = Integer.parseInt(astate.getState().substring(comma + 1, astate.getState().length() - 1));
+                            gc.drawImage(hintImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
+                        }
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        System.out.println("FileNotFoundException");
+                    }
+                }
+                else if(isSolve())
+                {
+                    try {
+                        Image solveImage = new Image(new FileInputStream(ImageFileNameSolve.get()));
                         for (AState astate :solution.getSolutionPath()) {
                             int comma = astate.getState().indexOf(44);
                             int row = Integer.parseInt(astate.getState().substring(1, comma));
@@ -176,7 +234,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
                     {
                         System.out.println("FileNotFoundException");
                     }
-
                 }
                 gc.drawImage(goalImage, goalPosition.getColumnIndex() * cellHeight, goalPosition.getRowIndex() * cellWidth, cellHeight, cellWidth);
                 gc.drawImage(characterImage, characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
@@ -191,6 +248,9 @@ public class MazeDisplayer extends Canvas implements Serializable {
     private StringProperty ImageFileNameCharacter = new SimpleStringProperty();
     private StringProperty ImageFileNameGoal = new SimpleStringProperty();
     private StringProperty ImageFileNameSolve = new SimpleStringProperty();
+    private StringProperty ImageFileNameHint = new SimpleStringProperty();
+
+    //endregion
 
     public String getImageFileNameSolve() {
         return ImageFileNameSolve.get();
@@ -200,6 +260,13 @@ public class MazeDisplayer extends Canvas implements Serializable {
         this.ImageFileNameSolve.set(imageFileNameSolve);
     }
 
+    public String getImageFileNameHint() {
+        return ImageFileNameHint.get();
+    }
+
+    public void setImageFileNameHint(String imageFileNameHint) {
+        this.ImageFileNameHint.set(imageFileNameHint);
+    }
     public String getImageFileNameGoal() {
         return ImageFileNameGoal.get();
     }
@@ -223,7 +290,5 @@ public class MazeDisplayer extends Canvas implements Serializable {
     public void setImageFileNameCharacter(String imageFileNameCharacter) {
         this.ImageFileNameCharacter.set(imageFileNameCharacter);
     }
-
-    //endregion
 
 }

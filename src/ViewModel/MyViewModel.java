@@ -1,5 +1,6 @@
 package ViewModel;
 
+import IO.MyCompressorOutputStream;
 import Model.IModel;
 import Model.MyModel;
 import View.MazeDisplayer;
@@ -55,90 +56,18 @@ public class MyViewModel extends Observable implements Observer {
 
     //endregion
 
- /*   public void setRows(KeyCode keyCode)
+    public void solveMaze(int rows, int columns){
+        model.solveMaze(rows, columns);
+    }
+       public void load(File chosen)
     {
-        if(keyEvent.getCode() == KeyCode.ENTER) {
-            int rows = Integer.valueOf(txtfld_rowsNum.getText());
-            int columns = Integer.valueOf(txtfld_columnsNum.getText());
-            if (rows < 10 || columns < 10) {
-                showAlert("The maze is too small! what are you child?");
-            }
-            txtfld_columnsNum.requestFocus();
-            keyEvent.consume();
-        //    mazeDisplayer.setMaze(getNewMaze(rows,columns));
-          //  mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
+        model.load(chosen);
     }
 
-    public void setCols(KeyEvent keyEvent)
+    public void save(File chosen)
     {
-        if(keyEvent.getCode() == KeyCode.ENTER) {
-            int rows = Integer.valueOf(txtfld_rowsNum.getText());
-            int columns = Integer.valueOf(txtfld_columnsNum.getText());
-            if (rows < 10 || columns < 10) {
-                showAlert("The maze is too small! what are you child?");
-
-            }
-            mazeDisplayer.setMaze(getNewMaze(rows,columns));
-            if(solve_button.isDisable())
-                solve_button.setDisable(false);
-            mazeDisplayer.requestFocus();
-            keyEvent.consume();
-            //mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
-    }*/
-
-      /* public void load()
-    {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("load maze");
-        fc.setInitialDirectory(new File("./savedMazes"));
-        File chosen = fc.showOpenDialog(null);
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream("./savedMazes/" + chosen.getName());
-            ObjectInputStream is = new ObjectInputStream(fis);
-            mazeDisplayer = (MazeDisplayer) is.readObject();
-            generateMaze();
-            //mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-            is.close();
-            fis.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("FileNotFoundException");
-            showAlert("FileNotFoundException");
-
-        }
-        catch (IOException e)
-        {
-            System.out.println("IOException");
-            showAlert("IOException");
-        }
-        catch (ClassNotFoundException e)
-        {
-            System.out.println("ClassNotFoundException");
-            showAlert("ClassNotFoundException");
-
-        }
+        model.save(chosen);
     }
-
-    public void save()
-    {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Saving the maze");
-        fc.setInitialDirectory(new File("./savedMazes"));
-        fc.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Maze files (*.maze)", "*.maze"));
-        File chosen = fc.showSaveDialog(null);
-        try {
-            File file = new File("./savedMazes/" + chosen.getName());
-            FileOutputStream fo = new FileOutputStream(file);
-            ObjectOutputStream os = new ObjectOutputStream(fo);
-            os.writeObject(mazeDisplayer);
-            fo.close();
-            os.close();
-        } catch (IOException ex) {
-            System.out.println("IOException");
-        }
-    }*/
 
     public void exit() {
         model.exit();

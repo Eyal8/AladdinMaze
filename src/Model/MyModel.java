@@ -1,6 +1,7 @@
 package Model;
 
 import Client.*;
+import IO.MyCompressorOutputStream;
 import IO.MyDecompressorInputStream;
 import Server.Server;
 import Server.ServerStrategyGenerateMaze;
@@ -10,6 +11,8 @@ import algorithms.mazeGenerators.IMazeGenerator;
 import algorithms.mazeGenerators.Maze;
 import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
+import algorithms.search.AState;
+import algorithms.search.Solution;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -24,6 +27,7 @@ import test.RunCommunicateWithServers;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +45,7 @@ public class MyModel extends Observable implements IModel {
     private Server solveSearchProblemServer;
     public  MyModel()
     {
+        maze = new Maze(new int[0][0]);
         mazeGeneratingServer = new Server(5400, 1000, new ServerStrategyGenerateMaze());
         solveSearchProblemServer = new Server(5401, 1000, new ServerStrategySolveSearchProblem());    }
 
@@ -75,13 +80,10 @@ public class MyModel extends Observable implements IModel {
 
         threadPool.submit(() -> {
             generatingMazeClient(rows, columns);
-            System.out.println("hegiaaa la Model1");
             maze.print();
             characterPositionRow = maze.getStartPosition().getRowIndex();
-            System.out.println("hegiaaa la Model2");
             characterPositionColumn = maze.getStartPosition().getColumnIndex();
             setChanged();
-            System.out.println("hegiaaa la Model3");
             notifyObservers();
         } );
        /* threadPool.execute(() -> {
@@ -148,59 +150,86 @@ public class MyModel extends Observable implements IModel {
 
     //endregion
 
-/*
-    public void load()
+    public void solveMaze(int rows, int columns){
+        threadPool.submit(() -> {
+            solvingMazeClient(rows, columns);
+            maze.print();
+            setChanged();
+            notifyObservers();
+        } );
+    }
+
+    private void solvingMazeClient(int rows, int columns)
     {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("load maze");
-        fc.setInitialDirectory(new File("./savedMazes"));
-        File chosen = fc.showOpenDialog(null);
-        FileInputStream fis = null;
         try {
-            fis = new FileInputStream("./savedMazes/" + chosen.getName());
-            ObjectInputStream is = new ObjectInputStream(fis);
-            mazeDisplayer = (MazeDisplayer) is.readObject();
-            generateMaze();
-            //mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
+            Client client = new Client(InetAddress.getLocalHost(), 5401, new IClientStrategy() {
+                public void clientStrategy(InputStream inFromServer, OutputStream outToServer) {
+                    try {
+                        ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
+                        ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
+                        toServer.flush();
+                        MyMazeGenerator mg = new MyMazeGenerator();
+                        Maze maze = mg.generate(rows, columns);
+                        toServer.writeObject(maze);
+                        toServer.flush();
+                        Solution mazeSolution = (Solution)fromServer.readObject();
+                        System.out.println(String.format("Solution steps: %s", new Object[]{mazeSolution}));
+                        ArrayList<AState> mazeSolutionSteps = mazeSolution.getSolutionPath();
+
+                        for(int i = 0; i < mazeSolutionSteps.size(); ++i) {
+                            System.out.println(String.format("%s. %s", new Object[]{Integer.valueOf(i), ((AState)mazeSolutionSteps.get(i)).toString()}));
+                        }
+                    } catch (Exception var10) {
+                        var10.printStackTrace();
+                    }
+
+                }
+            });
+            client.communicateWithServer();
+        } catch (UnknownHostException var1) {
+            var1.printStackTrace();
+        }
+    }
+    public void load(File chosen)
+    {
+        byte mazeBytes[] = new byte[0];
+        try {
+            FileInputStream fis = new FileInputStream("./savedMazes/" + chosen.getName());
+            FileInputStream tmp = new FileInputStream("./savedMazes/" + chosen.getName());
+            InputStream is = new MyDecompressorInputStream(fis);
+            mazeBytes = new byte[tmp.read()*tmp.read()+6];
+            is.read(mazeBytes);
             is.close();
             fis.close();
+            tmp.close();
         } catch (FileNotFoundException e) {
             System.out.println("FileNotFoundException");
-            showAlert("FileNotFoundException");
-
         }
         catch (IOException e)
         {
             System.out.println("IOException");
-            showAlert("IOException");
         }
-        catch (ClassNotFoundException e)
-        {
-            System.out.println("ClassNotFoundException");
-            showAlert("ClassNotFoundException");
-
-        }
+        maze  = new Maze(mazeBytes);
+        characterPositionRow = maze.getStartPosition().getRowIndex();
+        characterPositionColumn = maze.getGoalPosition().getColumnIndex();
+        setChanged();
+        notifyObservers();
     }
 
-    public void save()
+    public void save(File chosen)
     {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Saving the maze");
-        fc.setInitialDirectory(new File("./savedMazes"));
-        fc.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Maze files (*.maze)", "*.maze"));
-        File chosen = fc.showSaveDialog(null);
         try {
-            File file = new File("./savedMazes/" + chosen.getName());
-            FileOutputStream fo = new FileOutputStream(file);
-            ObjectOutputStream os = new ObjectOutputStream(fo);
-            os.writeObject(mazeDisplayer);
-            fo.close();
+            FileOutputStream file = new FileOutputStream(chosen);
+            OutputStream os = new MyCompressorOutputStream(file);
+            maze.setStart(new Position(characterPositionRow, characterPositionColumn));
+            os.write(maze.toByteArray());
+            os.flush();
             os.close();
         } catch (IOException ex) {
             System.out.println("IOException");
         }
     }
-*/
+
     public void exit(){
         stopServers();
         threadPool.shutdown();
