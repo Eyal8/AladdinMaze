@@ -115,13 +115,12 @@ public class View implements Observer, IView {
           //  Char_column.setText(viewModel.getCharacterColumn());
             if(solve) {
                 mazeDisplayer.setSolve(true);
-                displayMaze(viewModel.getBoard());
             }
             else
             {
                 mazeDisplayer.setSolve(false);
-                displayMaze(viewModel.getBoard());
             }
+            displayMaze(viewModel.getBoard());
             newFile.setDisable(false);
             solve_button.setDisable(false);
             hint_button.setDisable(false);
@@ -174,18 +173,18 @@ public class View implements Observer, IView {
     }
     public void zooming(ScrollEvent se)
     {
-        if(se.isControlDown() && se.getDeltaY() < 0)
-        {
+     //   if(se.isControlDown() && se.getDeltaY() < 0)
+      //  {
             mazeDisplayer.setHeight(mazeDisplayer.getHeight() + se.getDeltaY());
             mazeDisplayer.setWidth(mazeDisplayer.getWidth() + se.getDeltaY());
             mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
+      /*  }
         else if(se.isControlDown() && se.getDeltaY() > 0)
         {
             mazeDisplayer.setHeight(mazeDisplayer.getHeight() + se.getDeltaY());
             mazeDisplayer.setWidth(mazeDisplayer.getWidth() + se.getDeltaY());
             mazeDisplayer.setCharacterPosition(mazeDisplayer.getCharacterPositionRow(), mazeDisplayer.getCharacterPositionColumn());
-        }
+        }*/
         se.consume();
     }
 

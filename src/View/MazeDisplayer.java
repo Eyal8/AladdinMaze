@@ -164,12 +164,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
             double canvasWidth = getHeight();
             double cellHeight = canvasHeight / maze.length;
             double cellWidth = canvasWidth / maze[0].length;
-            System.out.println("canvasHeight   " + canvasHeight + "\n");
-            System.out.println("canvasWidth   " + canvasWidth+ "\n");
-            System.out.println("cellHeight   " + cellHeight+ "\n");
-            System.out.println("cellWidth   " + cellWidth+ "\n");
-            System.out.println();
-            System.out.println();
             try {
                 Image wallImage = new Image(new FileInputStream(ImageFileNameWall.get()));
                 Image characterImage = new Image(new FileInputStream(ImageFileNameCharacter.get()));
