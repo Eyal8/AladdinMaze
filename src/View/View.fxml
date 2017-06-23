@@ -94,9 +94,14 @@
         </VBox>
     </top>
     <center>
-        <MazeDisplayer fx:id="mazeDisplayer" height="-Infinity" width="-Infinity" imageFileNameCharacter="resources/Images/alMarket.jpg" imageFileNameGoal="resources/Images/light.jpg" imageFileNameHint="resources/Images/abu.jpg" imageFileNameSolve="resources/Images/flying.jpg" imageFileNameWall="resources/Images/cave.jpg" onScroll="#zooming"  BorderPane.alignment="CENTER">
+        <Pane>
+            <children>
+        <MazeDisplayer fx:id="mazeDisplayer" height="600" width="600" imageFileNameCharacter="resources/Images/alMarket.jpg" imageFileNameGoal="resources/Images/light.jpg" imageFileNameHint="resources/Images/abu.jpg" imageFileNameSolve="resources/Images/flying.jpg" imageFileNameWall="resources/Images/cave.jpg" onScroll="#zooming"  BorderPane.alignment="CENTER">
             <BorderPane.margin>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-            </BorderPane.margin></MazeDisplayer>
+            </BorderPane.margin>
+        </MazeDisplayer>
+            </children>
+        </Pane>
     </center>
 </BorderPane>

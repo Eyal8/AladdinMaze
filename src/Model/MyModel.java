@@ -43,6 +43,7 @@ public class MyModel extends Observable implements IModel {
     private int characterPositionColumn;
     private Server mazeGeneratingServer;
     private Server solveSearchProblemServer;
+    private  ArrayList<Position> path = new ArrayList<Position>();
     public  MyModel()
     {
         maze = new Maze(new int[0][0]);
@@ -60,6 +61,10 @@ public class MyModel extends Observable implements IModel {
         solveSearchProblemServer.stop();
     }
 
+    public ArrayList<Position> getPath()
+    {
+        return path;
+    }
     @Override
     public int getCharacterPositionRow() {
         return characterPositionRow;
@@ -168,16 +173,20 @@ public class MyModel extends Observable implements IModel {
                         ObjectOutputStream toServer = new ObjectOutputStream(outToServer);
                         ObjectInputStream fromServer = new ObjectInputStream(inFromServer);
                         toServer.flush();
-                        MyMazeGenerator mg = new MyMazeGenerator();
-                        Maze maze = mg.generate(rows, columns);
+                      //  MyMazeGenerator mg = new MyMazeGenerator();
+                       // Maze maze = mg.generate(rows, columns);
+                        maze.setStart(new Position(characterPositionRow, characterPositionColumn));
                         toServer.writeObject(maze);
                         toServer.flush();
                         Solution mazeSolution = (Solution)fromServer.readObject();
-                        System.out.println(String.format("Solution steps: %s", new Object[]{mazeSolution}));
                         ArrayList<AState> mazeSolutionSteps = mazeSolution.getSolutionPath();
-
-                        for(int i = 0; i < mazeSolutionSteps.size(); ++i) {
-                            System.out.println(String.format("%s. %s", new Object[]{Integer.valueOf(i), ((AState)mazeSolutionSteps.get(i)).toString()}));
+                        path = new ArrayList<Position>();
+                        for(int i = 0; i < mazeSolutionSteps.size() - 1; ++i) {
+                            AState astate = mazeSolutionSteps.get(i);
+                            int comma = astate.getState().indexOf(44);
+                            int row = Integer.parseInt(astate.getState().substring(1, comma));
+                            int col = Integer.parseInt(astate.getState().substring(comma + 1, astate.getState().length() - 1));
+                            path.add(new Position(row, col));
                         }
                     } catch (Exception var10) {
                         var10.printStackTrace();
@@ -211,7 +220,7 @@ public class MyModel extends Observable implements IModel {
         }
         maze  = new Maze(mazeBytes);
         characterPositionRow = maze.getStartPosition().getRowIndex();
-        characterPositionColumn = maze.getGoalPosition().getColumnIndex();
+        characterPositionColumn = maze.getStartPosition().getColumnIndex();
         setChanged();
         notifyObservers();
     }

@@ -7,6 +7,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by eyal8_000 on 16/06/2017.
@@ -22,4 +23,6 @@ public interface IModel {
     public Position getGoalPosition();
     public void save(File chosen);
     public void load(File chosen);
+    public ArrayList<Position> getPath();
+
 }

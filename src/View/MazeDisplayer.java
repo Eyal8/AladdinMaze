@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -23,7 +24,7 @@ import java.util.Observer;
  */
 public class MazeDisplayer extends Canvas implements Serializable {
 
-    Position startPosition;
+    private ArrayList<Position> path;
     Position goalPosition;
     private int[][] maze;
     private int characterPositionRow;
@@ -49,6 +50,11 @@ public class MazeDisplayer extends Canvas implements Serializable {
       //  redraw();
     }
 
+    public void setPath(ArrayList<Position> path)
+    {
+        this.path = path;
+    }
+
     public void getHint()
     {
         hint++;
@@ -57,13 +63,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
     public void zeroHint()
     {
         hint = 0;
-    }
-    public Position getStartPosition() {
-        return startPosition;
-    }
-
-    public void setStartPosition(Position startPosition) {
-        this.startPosition = startPosition;
     }
 
     public Position getGoalPosition() {
@@ -184,26 +183,24 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 //Draw Character
                 //gc.setFill(Color.RED);
                 //gc.fillOval(characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
-                ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
-                Maze m = new Maze(maze);
-                m.setStart(new Position(characterPositionRow, characterPositionColumn));
-                m.setGoal(goalPosition);
-                ISearchable searchableMaze = new SearchableMaze(m);
-                Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
-                if(hint > 0)
+              // ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
+              // Maze m = new Maze(maze);
+              // m.setStart(new Position(characterPositionRow, characterPositionColumn));
+              // m.setGoal(goalPosition);
+              // ISearchable searchableMaze = new SearchableMaze(m);
+              // Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
+                if(hint > 0 && path != null && !isSolve())
                 {
                     try {
                         Image hintImage = new Image(new FileInputStream(ImageFileNameHint.get()));
                         int x = 0;
-                        if(hint + 1 < solution.getSolutionPath().size())
+                        if(hint + 1 < path.size())
                             x = hint + 1;
                         else
-                            x = solution.getSolutionPath().size();
+                            x = path.size();
                         for(int i = 1; i < x; i++){
-                            AState astate = solution.getSolutionPath().get(i);
-                            int comma = astate.getState().indexOf(44);
-                            int row = Integer.parseInt(astate.getState().substring(1, comma));
-                            int col = Integer.parseInt(astate.getState().substring(comma + 1, astate.getState().length() - 1));
+                            int row = path.get(i).getRowIndex();
+                            int col = path.get(i).getColumnIndex();
                             gc.drawImage(hintImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
                         }
                     }
@@ -216,10 +213,9 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 {
                     try {
                         Image solveImage = new Image(new FileInputStream(ImageFileNameSolve.get()));
-                        for (AState astate :solution.getSolutionPath()) {
-                            int comma = astate.getState().indexOf(44);
-                            int row = Integer.parseInt(astate.getState().substring(1, comma));
-                            int col = Integer.parseInt(astate.getState().substring(comma + 1, astate.getState().length() - 1));
+                        for (Position p : path) {
+                            int row = p.getRowIndex();
+                            int col = p.getColumnIndex();
                             gc.drawImage(solveImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
 
                         }

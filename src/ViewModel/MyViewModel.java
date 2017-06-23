@@ -23,6 +23,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -131,5 +132,10 @@ public class MyViewModel extends Observable implements Observer {
     }
 
     public Position getGoalPosition(){return model.getGoalPosition();}
+
+    public ArrayList<Position> getPath()
+    {
+        return model.getPath();
+    }
 
 }
