@@ -230,8 +230,11 @@ public class MazeDisplayer extends Canvas implements Serializable {
                         System.out.println("FileNotFoundException");
                     }
                 }
-                gc.drawImage(goalImage, goalPosition.getRowIndex() * cellWidth, goalPosition.getColumnIndex() * cellHeight, cellWidth, cellHeight);
-                gc.drawImage(characterImage, characterPositionRow * cellWidth,characterPositionColumn * cellHeight , cellWidth, cellHeight);
+                System.out.println("goalPosition  " + goalPosition);
+                System.out.println("characterPosition:   " + characterPositionRow +" " + characterPositionColumn);
+
+                gc.drawImage(goalImage, goalPosition.getColumnIndex() * cellWidth, goalPosition.getRowIndex() * cellHeight, cellWidth, cellHeight);
+                gc.drawImage(characterImage, characterPositionColumn * cellWidth,characterPositionRow * cellHeight , cellWidth, cellHeight);
             } catch (FileNotFoundException e) {
                 //e.printStackTrace();
             }
