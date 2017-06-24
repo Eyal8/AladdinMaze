@@ -59,7 +59,6 @@ public class View implements Observer, IView {
         checkSong();
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
-
         newFile.setDisable(true);
         if(rows<10 || columns<10)
         {
@@ -87,6 +86,7 @@ public class View implements Observer, IView {
     {
         mazeDisplayer.zeroHint();
         hint = 0;
+        hint_button.setDisable(false);
     }
     public void solveMaze(ActionEvent actionEvent) {
 
@@ -116,6 +116,10 @@ public class View implements Observer, IView {
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
         //  showAlert("Number of hints taken:  " + hint);
         viewModel.solveMaze(rows, columns);
+        if(hint + 1 == viewModel.getPath().size()) {
+            hint_button.setDisable(true);
+            mazeDisplayer.requestFocus();
+        }
     }
     @Override
     public void update(Observable o, Object arg) {
@@ -134,7 +138,6 @@ public class View implements Observer, IView {
             displayMaze(viewModel.getBoard());
             newFile.setDisable(false);
             solve_button.setDisable(false);
-            hint_button.setDisable(false);
             mazeDisplayer.requestFocus();
             // mazeDisplayer.setSolve(false);
         }
@@ -170,7 +173,6 @@ public class View implements Observer, IView {
     public void setCols(KeyEvent keyEvent)
     {
         if(keyEvent.getCode() == KeyCode.ENTER) {
-            int rows = Integer.valueOf(txtfld_rowsNum.getText());
             int columns = Integer.valueOf(txtfld_columnsNum.getText());
             if (columns < 10) {
                 showAlert("The maze is too small! what are you child?");

@@ -54,7 +54,7 @@
                      <Blend mode="LIGHTEN" />
                   </effect></TextField>
                     <TextField fx:id="txtfld_columnsNum" disable="false" onKeyPressed="#setCols" text="50" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                    <Button fx:id="solve_button" cancelButton="true" defaultButton="true" disable="true" graphicTextGap="8.0" mouseTransparent="true" onAction="#solveMaze" prefHeight="30.0" prefWidth="154.0" text="Show/Hide Solution" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10">
+                    <Button fx:id="solve_button" disable="true" graphicTextGap="8.0" onAction="#solveMaze" prefHeight="30.0" prefWidth="154.0" text="Show/Hide Solution" textAlignment="CENTER" textFill="WHITE" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10">
                   <GridPane.margin>
                      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                   </GridPane.margin>

@@ -58,10 +58,9 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
 
         WebView webview = new WebView();
-        webview.getEngine().load(
-                "http://ytcropper.com/cropped/KV594e22af3c376"
-        );
-//        webview.setPrefSize(640, 390);
+     //   webview.getEngine().load(
+       //         "http://ytcropper.com/cropped/KV594e22af3c376"
+        //);
         s = new Stage();
         s.setScene(new Scene(webview));
         s.setTitle("Press X to start the game");

@@ -74,19 +74,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
     }
 
     public void setCharacterPosition(int row, int column) {
-        if(goalPosition != null) {
-            if (goalPosition.getRowIndex() == row && goalPosition.getColumnIndex() == column) {
-                View.mediaPlayer.pause();
-                View.setSong("resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
-                View.mediaPlayer.setVolume(0.7);
-                View.mediaPlayer.play();
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Congratulations!");
-                alert.setHeaderText("You found the magic lamp!");
-                alert.setContentText("Start a new game, load a game or exit");
-                alert.showAndWait();
-            }
-        }
         characterPositionRow = row;
         characterPositionColumn = column;
         redraw();
@@ -172,10 +159,36 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 Image wallImage = new Image(new FileInputStream(ImageFileNameWall.get()));
                 Image characterImage = new Image(new FileInputStream(ImageFileNameCharacter.get()));
                 Image goalImage = new Image(new FileInputStream(ImageFileNameGoal.get()));
+                Image hintImage = new Image(new FileInputStream(ImageFileNameHint.get()));
+                Image solveImage = new Image(new FileInputStream(ImageFileNameSolve.get()));
                 GraphicsContext gc = getGraphicsContext2D();
                 gc.clearRect(0, 0, getWidth(), getHeight());
-
+           //     gc.fil
                 //Draw Maze
+                if(hint > 0 && path != null && !isSolve()) {
+
+                    int x = 0;
+                    if (hint + 1 < path.size())
+                        x = hint + 1;
+                    else
+                        x = path.size();
+                    for (int i = 1; i < x; i++) {
+                        int row = path.get(i).getRowIndex();
+                        int col = path.get(i).getColumnIndex();
+                        gc.drawImage(hintImage, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+
+                    }
+                }
+                else if(isSolve())
+                {
+                        for (Position p : path) {
+                            int row = p.getRowIndex();
+                            int col = p.getColumnIndex();
+                            gc.drawImage(solveImage, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+
+                        }
+
+                }
                 for (int i = 0; i < maze.length; i++) {
                     for (int j = 0; j < maze[i].length; j++) {
                         if (maze[i][j] == 1) {
@@ -184,59 +197,24 @@ public class MazeDisplayer extends Canvas implements Serializable {
                         }
                     }
                 }
-
-                //Draw Character
-                //gc.setFill(Color.RED);
-                //gc.fillOval(characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
-              // ISearchingAlgorithm searchingAlgorithm = new BestFirstSearch();
-              // Maze m = new Maze(maze);
-              // m.setStart(new Position(characterPositionRow, characterPositionColumn));
-              // m.setGoal(goalPosition);
-              // ISearchable searchableMaze = new SearchableMaze(m);
-              // Solution solution = ((ISearchingAlgorithm)searchingAlgorithm).solve(searchableMaze);
-                if(hint > 0 && path != null && !isSolve())
-                {
-                    try {
-                        Image hintImage = new Image(new FileInputStream(ImageFileNameHint.get()));
-                        int x = 0;
-                        if(hint + 1 < path.size())
-                            x = hint + 1;
-                        else
-                            x = path.size();
-                        for(int i = 1; i < x; i++){
-                            int row = path.get(i).getRowIndex();
-                            int col = path.get(i).getColumnIndex();
-                            gc.drawImage(hintImage, row * cellWidth, col * cellHeight, cellWidth, cellHeight);
-                        }
-                    }
-                    catch (FileNotFoundException e)
-                    {
-                        System.out.println("FileNotFoundException");
-                    }
-                }
-                else if(isSolve())
-                {
-                    try {
-                        Image solveImage = new Image(new FileInputStream(ImageFileNameSolve.get()));
-                        for (Position p : path) {
-                            int row = p.getRowIndex();
-                            int col = p.getColumnIndex();
-                            gc.drawImage(solveImage, row * cellWidth, col * cellHeight, cellWidth, cellHeight);
-
-                        }
-                    }
-                    catch (FileNotFoundException e)
-                    {
-                        System.out.println("FileNotFoundException");
-                    }
-                }
-                System.out.println("goalPosition  " + goalPosition);
-                System.out.println("characterPosition:   " + characterPositionRow +" " + characterPositionColumn);
-
                 gc.drawImage(goalImage, goalPosition.getColumnIndex() * cellWidth, goalPosition.getRowIndex() * cellHeight, cellWidth, cellHeight);
                 gc.drawImage(characterImage, characterPositionColumn * cellWidth,characterPositionRow * cellHeight , cellWidth, cellHeight);
+
             } catch (FileNotFoundException e) {
                 //e.printStackTrace();
+            }
+            if(goalPosition != null) {
+                if (goalPosition.getRowIndex() == characterPositionRow && goalPosition.getColumnIndex() == characterPositionColumn) {
+                    View.mediaPlayer.pause();
+                    View.setSong("resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
+                    View.mediaPlayer.setVolume(0.7);
+                    View.mediaPlayer.play();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Congratulations!");
+                    alert.setHeaderText("You found the magic lamp!");
+                    alert.setContentText("Start a new game, load a game or exit");
+                    alert.showAndWait();
+                }
             }
         }
     }

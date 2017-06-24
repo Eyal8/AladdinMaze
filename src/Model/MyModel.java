@@ -85,7 +85,6 @@ public class MyModel extends Observable implements IModel {
 
         threadPool.submit(() -> {
             generatingMazeClient(rows, columns);
-            maze.print();
             characterPositionRow = maze.getStartPosition().getRowIndex();
             characterPositionColumn = maze.getStartPosition().getColumnIndex();
             setChanged();
@@ -118,7 +117,6 @@ public class MyModel extends Observable implements IModel {
                         byte[] decompressedMaze = new byte[(rows * columns) + 6];
                         is.read(decompressedMaze);
                         maze = new Maze(decompressedMaze);
-                        //maze.print();
                     } catch (Exception var10) {
                         var10.printStackTrace();
                     }
@@ -158,7 +156,6 @@ public class MyModel extends Observable implements IModel {
     public void solveMaze(int rows, int columns){
         threadPool.submit(() -> {
             solvingMazeClient(rows, columns);
-            maze.print();
             setChanged();
             notifyObservers();
         } );
