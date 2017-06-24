@@ -51,13 +51,12 @@ public class View implements Observer, IView {
     public  javafx.scene.control.Label Char_column;
     public  javafx.scene.control.MenuItem newFile;
     public BorderPane board;
-    MediaPlayer mediaPlayer;
-    MediaPlayer sol;
+    public static MediaPlayer mediaPlayer;
+    public static Media song;
     //public void setViewModel
     public void generateMaze() {
         zeroHint();
-        mediaPlayer.setVolume(0.1);
-        mediaPlayer.play();
+        checkSong();
         int rows = Integer.valueOf(txtfld_rowsNum.getText());
         int columns = Integer.valueOf(txtfld_columnsNum.getText());
 
@@ -212,7 +211,7 @@ public class View implements Observer, IView {
         File chosen = fc.showOpenDialog((Stage) mazeDisplayer.getScene().getWindow());
         if(chosen != null) {
             viewModel.load(chosen);
-            mediaPlayer.play();
+            checkSong();
         }
     }
 
@@ -278,13 +277,90 @@ public class View implements Observer, IView {
         this.viewModel = viewModel;
         Char_column.textProperty().bind(viewModel.characterColumnProperty());
         Char_row.textProperty().bind(viewModel.characterRowProperty());
-        Media song = new Media("file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/aladdin-friendlikemehighquality_cutted.mp3");
-        mediaPlayer = new MediaPlayer(song);
+        //Media song = new Media("file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/aladdin-friendlikemehighquality_cutted.mp3");
+       // mediaPlayer = new MediaPlayer(song);
         // Media solveSong = new Media("file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/file:///C:/Users/Shani/IdeaProjects/Project_PartC/resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
         //  sol = new MediaPlayer(solveSong);
         //  mazePane.getChildren().add(mazeDisplayer);
         // mazeDisplayer.heightProperty().bind(mazePane.heightProperty());
         // mazeDisplayer.widthProperty().bind(mazePane.widthProperty());
+    }
+
+    public static void setSong(String url)
+    {
+        String path = new File(url).getAbsolutePath();
+        song = new Media(new File(path).toURI().toString());
+        mediaPlayer = new MediaPlayer(song);
+    }
+
+    private void checkSong()
+    {
+        if(mediaPlayer == null && song == null)
+        {
+            setSong("resources/music/aladdin-friendlikemehighquality_cutted.mp3");
+            mediaPlayer.setVolume(0.1);
+            mediaPlayer.play();
+        }
+        if(mediaPlayer!= null && !song.getSource().contains("friend")) {//second song
+            mediaPlayer.stop();
+            setSong("resources/music/aladdin-friendlikemehighquality_cutted.mp3");
+            mediaPlayer.setVolume(0.1);
+            mediaPlayer.play();
+        }
+    }
+    public void properties()
+    {
+        boolean firstLine = true;
+        String everything = null;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("config.properties"));
+            try {
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                try {
+                    line = br.readLine();
+                    line = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                while (line != null || firstLine) {
+                    if(firstLine)
+                    {
+                        firstLine = false;
+                        try {
+                            line = br.readLine();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        continue;
+                    }
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    try {
+                        line = br.readLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                everything= sb.toString();
+
+
+            } finally {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Properties");
+        alert.setHeaderText("Game properties");
+        alert.setContentText(everything);
+        alert.showAndWait();
+
     }
 }
 

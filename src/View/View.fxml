@@ -2,15 +2,13 @@
 
 <?import View.MazeDisplayer?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -18,35 +16,74 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="board" onKeyPressed="#KeyPressed" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="View.View">
     <left>
         <VBox prefHeight="200.0" prefWidth="178.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
-                <GridPane prefWidth="309.0">
+                <GridPane prefHeight="315.0" prefWidth="168.0">
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="121.0" minWidth="10.0" prefWidth="112.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" minWidth="10.0" prefWidth="56.0" />
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints />
                   <RowConstraints />
                   <RowConstraints />
                   <RowConstraints />
                     </rowConstraints>
-                    <Label text="Maze rows:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <Label text="Maze columns:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                    <TextField fx:id="txtfld_rowsNum" disable="false" onKeyPressed="#setRows" text="50" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                    <TextField fx:id="txtfld_columnsNum" disable="false" onKeyPressed="#setCols" text="50" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                    <Button fx:id="solve_button" cancelButton="true" disable="true" onAction="#solveMaze" prefHeight="25.0" prefWidth="167.0" text="Show/Hide Solution" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="8" />
-                    <Button fx:id="hint_button" cancelButton="true" disable="true" onAction="#getHint" prefHeight="25.0" prefWidth="167.0" text="getHint" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="9" />
-                    <Label fx:id="Char_row" text="Char row:" prefHeight="17.0" prefWidth="19.0" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                    <Label fx:id="Char_column" text="Char column:" prefHeight="17.0" prefWidth="21.0" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                    <Label text="Maze rows" textAlignment="CENTER" textFill="WHITE" textOverrun="CENTER_ELLIPSIS" wrapText="true" GridPane.rowIndex="1">
+                  <font>
+                     <Font name="Gisha Bold" size="16.0" />
+                  </font></Label>
+                    <Label text="Maze columns" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.rowIndex="2">
+                  <font>
+                     <Font name="Gisha Bold" size="16.0" />
+                  </font></Label>
+                    <TextField fx:id="txtfld_rowsNum" disable="false" onKeyPressed="#setRows" text="50" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                  <effect>
+                     <Blend mode="LIGHTEN" />
+                  </effect></TextField>
+                    <TextField fx:id="txtfld_columnsNum" disable="false" onKeyPressed="#setCols" text="50" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Button fx:id="solve_button" cancelButton="true" defaultButton="true" disable="true" graphicTextGap="8.0" mouseTransparent="true" onAction="#solveMaze" prefHeight="30.0" prefWidth="154.0" text="Show/Hide Solution" textAlignment="CENTER" textFill="WHITE" wrapText="true" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10">
+                  <GridPane.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </GridPane.margin>
+                  <padding>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </padding>
+                  <font>
+                     <Font name="Arial Bold" size="21.0" />
+                  </font></Button>
+                    <Button fx:id="hint_button" cancelButton="true" defaultButton="true" disable="true" graphicTextGap="8.0" onAction="#getHint" prefHeight="14.0" prefWidth="154.0" text="getHint" textAlignment="CENTER" textFill="#ffffff7f" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="11">
+                  <GridPane.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </GridPane.margin>
+                  <padding>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </padding>
+                  <font>
+                     <Font name="Arial Bold" size="21.0" />
+                  </font></Button>
+                    <Label fx:id="Char_row" prefHeight="27.0" prefWidth="111.0" text="Char row" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                    <Label fx:id="Char_column" prefHeight="27.0" prefWidth="107.0" text="Char column:" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+               <TextField GridPane.columnIndex="1" GridPane.rowIndex="6" />
+               <TextField GridPane.columnIndex="1" GridPane.rowIndex="7" />
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets top="60.0" />
+               </VBox.margin>
                 </GridPane>
             </children>
             <padding>
@@ -75,7 +112,7 @@
                         </Menu>
                         <Menu mnemonicParsing="false" text="Options">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="Properties" />
+                                <MenuItem mnemonicParsing="false" onAction="#properties" text="Properties" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="Exit">
@@ -96,7 +133,7 @@
     <center>
         <Pane>
             <children>
-        <MazeDisplayer fx:id="mazeDisplayer" height="600" width="600" imageFileNameCharacter="resources/Images/alMarket.jpg" imageFileNameGoal="resources/Images/light.jpg" imageFileNameHint="resources/Images/abu.jpg" imageFileNameSolve="resources/Images/flying.jpg" imageFileNameWall="resources/Images/cave.jpg" onScroll="#zooming"  BorderPane.alignment="CENTER">
+        <MazeDisplayer fx:id="mazeDisplayer" height="600" imageFileNameCharacter="resources/Images/alMarket.jpg" imageFileNameGoal="resources/Images/light.jpg" imageFileNameHint="resources/Images/abu.jpg" imageFileNameSolve="resources/Images/flying.jpg" imageFileNameWall="resources/Images/cave.jpg" onScroll="#zooming" width="600" BorderPane.alignment="CENTER">
             <BorderPane.margin>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </BorderPane.margin>

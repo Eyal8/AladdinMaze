@@ -14,25 +14,36 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
+import java.io.IOException;
 
 
 public class Main extends Application {
 
+    Stage s;
     @FXML
     private MazeDisplayer mazeDisplayer;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception{
-
+    private void runMaze(Stage primaryStage, WebView webview)
+    {
+        webview.getEngine().load(null);
+        s.close();
         MyModel model = new MyModel();
         model.startServers();
         MyViewModel viewModel = new MyViewModel(model);
         model.addObserver(viewModel);
-        primaryStage.setTitle("My Application!");
+        primaryStage.setTitle("Help Aladding to find the magic lamp!");
         FXMLLoader fxmlLoader = new FXMLLoader();
-        Parent root = fxmlLoader.load(getClass().getResource("View.fxml").openStream());
+        Parent root = null;
+        try {
+            root = fxmlLoader.load(getClass().getResource("View.fxml").openStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Scene scene = new Scene(root, 800, 700);
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         primaryStage.setScene(scene);
@@ -40,7 +51,25 @@ public class Main extends Application {
         view.setResizeEvent(scene);
         view.setViewModel(viewModel);
         viewModel.addObserver(view);
+        primaryStage.setOnCloseRequest(event -> view.exit());
         primaryStage.show();
+    }
+    @Override
+    public void start(Stage primaryStage) throws Exception{
+
+        WebView webview = new WebView();
+        webview.getEngine().load(
+                "http://ytcropper.com/cropped/KV594e22af3c376"
+        );
+//        webview.setPrefSize(640, 390);
+        s = new Stage();
+        s.setScene(new Scene(webview));
+        s.setTitle("Press X to start the game");
+        s.setHeight(600);
+        s.setWidth(600);
+        s.show();
+        s.setOnCloseRequest(event -> runMaze(primaryStage, webview));
+
       //  model.stopServers();// exit
 
         //Rise Servers

@@ -74,14 +74,18 @@ public class MazeDisplayer extends Canvas implements Serializable {
     }
 
     public void setCharacterPosition(int row, int column) {
-        if(goalPosition.getRowIndex() == row && goalPosition.getColumnIndex() == column)
-        {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Who is you?");
-            alert.setHeaderText("We are the champions!!!");
-            alert.setContentText("You found the caramel!");
-
-            alert.showAndWait();
+        if(goalPosition != null) {
+            if (goalPosition.getRowIndex() == row && goalPosition.getColumnIndex() == column) {
+                View.mediaPlayer.pause();
+                View.setSong("resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
+                View.mediaPlayer.setVolume(0.7);
+                View.mediaPlayer.play();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Congratulations!");
+                alert.setHeaderText("You found the magic lamp!");
+                alert.setContentText("Start a new game, load a game or exit");
+                alert.showAndWait();
+            }
         }
         characterPositionRow = row;
         characterPositionColumn = column;
@@ -159,8 +163,9 @@ public class MazeDisplayer extends Canvas implements Serializable {
     }
     public void redraw() {
         if (maze != null) {
-            double canvasHeight = getWidth();
-            double canvasWidth = getHeight();
+            //getHeight//getWidth
+            double canvasHeight = getHeight();
+            double canvasWidth = getWidth();
             double cellHeight = canvasHeight / maze.length;
             double cellWidth = canvasWidth / maze[0].length;
             try {
@@ -175,7 +180,7 @@ public class MazeDisplayer extends Canvas implements Serializable {
                     for (int j = 0; j < maze[i].length; j++) {
                         if (maze[i][j] == 1) {
                             //gc.fillRect(i * cellHeight, j * cellWidth, cellHeight, cellWidth);
-                            gc.drawImage(wallImage, j * cellHeight, i * cellWidth, cellHeight, cellWidth);
+                            gc.drawImage(wallImage,  j * cellWidth, i * cellHeight, cellWidth, cellHeight);
                         }
                     }
                 }
@@ -201,7 +206,7 @@ public class MazeDisplayer extends Canvas implements Serializable {
                         for(int i = 1; i < x; i++){
                             int row = path.get(i).getRowIndex();
                             int col = path.get(i).getColumnIndex();
-                            gc.drawImage(hintImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
+                            gc.drawImage(hintImage, row * cellWidth, col * cellHeight, cellWidth, cellHeight);
                         }
                     }
                     catch (FileNotFoundException e)
@@ -216,7 +221,7 @@ public class MazeDisplayer extends Canvas implements Serializable {
                         for (Position p : path) {
                             int row = p.getRowIndex();
                             int col = p.getColumnIndex();
-                            gc.drawImage(solveImage, col * cellHeight, row * cellWidth, cellHeight, cellWidth);
+                            gc.drawImage(solveImage, row * cellWidth, col * cellHeight, cellWidth, cellHeight);
 
                         }
                     }
@@ -225,8 +230,8 @@ public class MazeDisplayer extends Canvas implements Serializable {
                         System.out.println("FileNotFoundException");
                     }
                 }
-                gc.drawImage(goalImage, goalPosition.getColumnIndex() * cellHeight, goalPosition.getRowIndex() * cellWidth, cellHeight, cellWidth);
-                gc.drawImage(characterImage, characterPositionColumn * cellHeight, characterPositionRow * cellWidth, cellHeight, cellWidth);
+                gc.drawImage(goalImage, goalPosition.getRowIndex() * cellWidth, goalPosition.getColumnIndex() * cellHeight, cellWidth, cellHeight);
+                gc.drawImage(characterImage, characterPositionRow * cellWidth,characterPositionColumn * cellHeight , cellWidth, cellHeight);
             } catch (FileNotFoundException e) {
                 //e.printStackTrace();
             }
