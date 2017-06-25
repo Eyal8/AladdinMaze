@@ -124,22 +124,22 @@ public class MazeDisplayer extends Canvas implements Serializable {
 
     @Override
     public double minWidth(double height) {
-        return 10;
+        return 400;
     }
 
     @Override
     public double minHeight(double width) {
-        return 10;
+        return 400;
     }
 
     @Override
     public double maxWidth(double height) {
-        return 800;
+        return 1000;
     }
 
     @Override
     public double maxHeight(double width) {
-        return 800;
+        return 1000;
     }
 
     @Override
@@ -150,7 +150,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
     }
     public void redraw() {
         if (maze != null) {
-            //getHeight//getWidth
             double canvasHeight = getHeight();
             double canvasWidth = getWidth();
             double cellHeight = canvasHeight / maze.length;
@@ -163,8 +162,7 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 Image solveImage = new Image(new FileInputStream(ImageFileNameSolve.get()));
                 GraphicsContext gc = getGraphicsContext2D();
                 gc.clearRect(0, 0, getWidth(), getHeight());
-           //     gc.fil
-                //Draw Maze
+
                 if(hint > 0 && path != null && !isSolve()) {
 
                     int x = 0;
@@ -181,18 +179,16 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 }
                 else if(isSolve())
                 {
-                        for (Position p : path) {
-                            int row = p.getRowIndex();
-                            int col = p.getColumnIndex();
+                    for(int i = 1; i < path.size(); i++)
+                    {
+                            int row = path.get(i).getRowIndex();
+                            int col = path.get(i).getColumnIndex();
                             gc.drawImage(solveImage, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
-
                         }
-
                 }
                 for (int i = 0; i < maze.length; i++) {
                     for (int j = 0; j < maze[i].length; j++) {
                         if (maze[i][j] == 1) {
-                            //gc.fillRect(i * cellHeight, j * cellWidth, cellHeight, cellWidth);
                             gc.drawImage(wallImage,  j * cellWidth, i * cellHeight, cellWidth, cellHeight);
                         }
                     }
@@ -201,20 +197,6 @@ public class MazeDisplayer extends Canvas implements Serializable {
                 gc.drawImage(characterImage, characterPositionColumn * cellWidth,characterPositionRow * cellHeight , cellWidth, cellHeight);
 
             } catch (FileNotFoundException e) {
-                //e.printStackTrace();
-            }
-            if(goalPosition != null) {
-                if (goalPosition.getRowIndex() == characterPositionRow && goalPosition.getColumnIndex() == characterPositionColumn) {
-                    View.mediaPlayer.pause();
-                    View.setSong("resources/music/aladdin-awholenewworldhighquality_cutted.mp3");
-                    View.mediaPlayer.setVolume(0.7);
-                    View.mediaPlayer.play();
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Congratulations!");
-                    alert.setHeaderText("You found the magic lamp!");
-                    alert.setContentText("Start a new game, load a game or exit");
-                    alert.showAndWait();
-                }
             }
         }
     }

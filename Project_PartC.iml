@@ -25,6 +25,14 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="ProjectPartB" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library name="ProjectPartB">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../ATPProject/ProjectPartB.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

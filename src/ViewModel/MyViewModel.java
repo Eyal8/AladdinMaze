@@ -19,6 +19,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
 
@@ -57,16 +58,15 @@ public class MyViewModel extends Observable implements Observer {
 
     //endregion
 
-    public void solveMaze(int rows, int columns){
+    public void solveMaze(int rows, int columns) {
         model.solveMaze(rows, columns);
     }
-       public void load(File chosen)
-    {
+
+    public void load(File chosen) {
         model.load(chosen);
     }
 
-    public void save(File chosen)
-    {
+    public void save(File chosen) {
         model.save(chosen);
     }
 
@@ -74,39 +74,22 @@ public class MyViewModel extends Observable implements Observer {
         model.exit();
     }
 
-    public void aboutTheProgrammers() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Who are we?");
-        alert.setHeaderText("information about us");
-        alert.setContentText("Our names are Eyal Arviv and Shani Houri and we are totaly awesome!");
-
-        alert.showAndWait();
-    }
-
-    public void aboutTheAlgorithms() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Algorithms");
-        alert.setHeaderText("Information about the algorithms used in this game");
-        alert.setContentText("In this game we used a few algorithms:\n" +
-                "first, the algorithm to generate the maze the DFS (Depth First Search) algorithm.\n" +
-                "second, the algorithm to solve the maze the Best first search algorithm.");
-        // alert.setContentText("first, the algorithm to generate the maze the DFS (Depth First Search) algorithm.");
-        // alert.setContentText("second, the algorithm to solve the maze the Best first search algorithm");
-
-        alert.showAndWait();
-    }
-
     @Override
     public void update(Observable o, Object arg) {
         if (o == model) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    CharacterRow.set(String.valueOf(model.getCharacterPositionRow()));
+                    CharacterColumn.set(String.valueOf(model.getCharacterPositionColumn()));
+                }
+            });
             setChanged();
             notifyObservers();
         }
     }
 
     //region String Property for Binding
-
-
     public String getCharacterRow() {
         return CharacterRow.get();
     }
@@ -131,11 +114,30 @@ public class MyViewModel extends Observable implements Observer {
         return model.getCharacterPositionColumn();
     }
 
-    public Position getGoalPosition(){return model.getGoalPosition();}
+    public Position getGoalPosition() {
+        return model.getGoalPosition();
+    }
 
-    public ArrayList<Position> getPath()
-    {
+    public ArrayList<Position> getPath() {
         return model.getPath();
     }
 
+    public void mouse(double cellHeight, double cellWidth, double mouseEndX, double mouseEndY) {
+        model.mouse(cellHeight, cellWidth, mouseEndX, mouseEndY);
+    }
+
+    public boolean checkWall(double cellHeight, double cellWidth, double x, double y) {
+        return model.checkWall(cellHeight, cellWidth, x, y); }
+    public void setxCharPos(double xCharPos){
+        model.setxCharPos(xCharPos);
+    }
+    public void setyCharPos(double yCharPos){
+        model.setyCharPos(yCharPos);
+    }
+    public double getxCharPos(){
+        return model.getxCharPos();
+    }
+    public double getyCharPos(){
+        return model.getyCharPos();
+    }
 }

@@ -20,6 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.FileChooser;
 import test.RunCommunicateWithServers;
@@ -43,6 +44,8 @@ public class MyModel extends Observable implements IModel {
     private int characterPositionColumn;
     private Server mazeGeneratingServer;
     private Server solveSearchProblemServer;
+    private double xCharPos;
+    private double yCharPos;
     private  ArrayList<Position> path = new ArrayList<Position>();
     public  MyModel()
     {
@@ -87,6 +90,8 @@ public class MyModel extends Observable implements IModel {
             generatingMazeClient(rows, columns);
             characterPositionRow = maze.getStartPosition().getRowIndex();
             characterPositionColumn = maze.getStartPosition().getColumnIndex();
+            xCharPos = characterPositionColumn;
+            yCharPos = characterPositionRow;
             setChanged();
             notifyObservers();
         } );
@@ -129,19 +134,19 @@ public class MyModel extends Observable implements IModel {
         }
     }
     public void KeyPressed(KeyCode keyCode) {
-        if (keyCode == KeyCode.UP) {
+        if (keyCode == KeyCode.UP || keyCode == KeyCode.W || keyCode == KeyCode.NUMPAD5) {
             if(maze.getMaze()[characterPositionRow - 1][characterPositionColumn] == 0)
                 characterPositionRow--;
         }
-        if (keyCode == KeyCode.DOWN) {
+        if (keyCode == KeyCode.DOWN || keyCode == KeyCode.S || keyCode == KeyCode.NUMPAD2) {
             if(maze.getMaze()[characterPositionRow + 1][characterPositionColumn] == 0)
                 characterPositionRow++;
         }
-        if (keyCode == KeyCode.RIGHT) {
+        if (keyCode == KeyCode.RIGHT || keyCode == KeyCode.D || keyCode == KeyCode.NUMPAD3) {
             if(maze.getMaze()[characterPositionRow][characterPositionColumn + 1] == 0)
                 characterPositionColumn++;
         }
-        if (keyCode == KeyCode.LEFT) {
+        if (keyCode == KeyCode.LEFT || keyCode == KeyCode.A || keyCode == KeyCode.NUMPAD1) {
             if(maze.getMaze()[characterPositionRow][characterPositionColumn - 1] == 0)
                 characterPositionColumn--;
         }
@@ -241,30 +246,91 @@ public class MyModel extends Observable implements IModel {
         threadPool.shutdown();
     }
 
-    public void aboutTheProgrammers(){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Who are we?");
-        alert.setHeaderText("information about us");
-        alert.setContentText("Our names are Eyal Arviv and Shani Houri and we are totaly awesome!");
-
-        alert.showAndWait();
+    public void mouse(double cellHeight, double cellWidth, double mouseEndX, double mouseEndY)
+    {
+        boolean xEndOk = false;
+        int newX = -1;
+        boolean yEndOk = false;
+        int newY = -1;
+        boolean xStartOK = xCharPos >= characterPositionColumn*cellWidth && xCharPos <= characterPositionColumn*cellWidth + cellWidth;
+        boolean yStartOK = yCharPos >= characterPositionRow*cellHeight && yCharPos <= characterPositionRow*cellHeight + cellHeight;
+        for(int i = 0; i < maze.getMaze()[0].length; i++)
+        {
+            if(mouseEndX >= i*cellHeight && mouseEndX <= i*cellHeight + cellWidth)
+            {
+                xEndOk = true;
+                newX = i;
+                break;
+            }
+        }
+        for(int i = 0; i < maze.getMaze().length; i++)
+        {
+            if(mouseEndY >= i*cellWidth && mouseEndY <= i*cellWidth + cellHeight)
+            {
+                yEndOk = true;
+                newY = i;
+                break;
+            }
+        }
+        if(xStartOK && yStartOK && xEndOk && yEndOk && maze.getMaze()[newX][newY] == 0)
+        {
+            characterPositionRow = newY;
+            characterPositionColumn = newX;
+            setChanged();
+            notifyObservers();
+        }
     }
-    public void aboutTheAlgorithms(){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Algorithms");
-        alert.setHeaderText("Information about the algorithms used in this game");
-        alert.setContentText("In this game we used a few algorithms:\n" +
-                "first, the algorithm to generate the maze the DFS (Depth First Search) algorithm.\n" +
-                "second, the algorithm to solve the maze the Best first search algorithm.");
-        // alert.setContentText("first, the algorithm to generate the maze the DFS (Depth First Search) algorithm.");
-        // alert.setContentText("second, the algorithm to solve the maze the Best first search algorithm");
-
-        alert.showAndWait();
+    public boolean checkWall(double cellHeight, double cellWidth, double x, double y){
+        boolean xEndOk = false;
+        int newX = -1;
+        boolean yEndOk = false;
+        int newY = -1;
+        boolean xStartOK = xCharPos >= characterPositionColumn*cellWidth && xCharPos <= characterPositionColumn*cellWidth + cellWidth;
+        boolean yStartOK = yCharPos >= characterPositionRow*cellHeight && yCharPos <= characterPositionRow*cellHeight + cellHeight;
+        for(int i = 0; i < maze.getMaze()[0].length; i++)
+        {
+            if(y >= i*cellWidth && y <= i*cellWidth + cellWidth)
+            {
+                xEndOk = true;
+                newX = i;
+                break;
+            }
+        }
+        for(int i = 0; i < maze.getMaze().length; i++)
+        {
+            if(x >= i*cellHeight && x <= i*cellHeight + cellHeight)
+            {
+                yEndOk = true;
+                newY = i;
+                break;
+            }
+        }
+        if(maze.getMaze()[newX][newY] == 1)
+            return false;
+        else if(xStartOK && yStartOK && xEndOk && yEndOk) {
+            xCharPos = x;
+            yCharPos = y;
+            characterPositionRow = newX;
+            characterPositionColumn = newY;
+            setChanged();
+            notifyObservers();
+            return true;
+        }
+        return true;
     }
-
+    public void setxCharPos(double xCharPos){
+        this.xCharPos = xCharPos;
+    }
+    public void setyCharPos(double yCharPos){
+        this.yCharPos = yCharPos;
+    }
+    public double getxCharPos(){
+        return xCharPos;
+    }
+    public double getyCharPos(){
+        return yCharPos;
+    }
     public Position getGoalPosition(){
         return maze.getGoalPosition();
     }
-
-
 }
