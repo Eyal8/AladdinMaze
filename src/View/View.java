@@ -455,6 +455,7 @@ public class View implements Observer, IView {
             mediaPlayer.pause();
             mute = true;
         }
+        mazeDisplayer.requestFocus();
     }
 }
 

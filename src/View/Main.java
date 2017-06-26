@@ -57,7 +57,7 @@ public class Main extends Application {
         s.setTitle("Intro");
         s.setFullScreen(true);
         s.show();
-        PauseTransition delay = new PauseTransition(Duration.seconds(17));
+        PauseTransition delay = new PauseTransition(Duration.seconds(1));
         delay.setOnFinished( event -> {
             s.close();
             runMaze(primaryStage);
