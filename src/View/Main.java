@@ -3,7 +3,10 @@ import Model.MyModel;
 import ViewModel.MyViewModel;
 import javafx.animation.*;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
@@ -21,6 +24,7 @@ public class Main extends Application {
     {
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(600);
+        primaryStage.setFullScreen(true);
         MyModel model = new MyModel();
         model.startServers();
         MyViewModel viewModel = new MyViewModel(model);
@@ -33,7 +37,10 @@ public class Main extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Scene scene = new Scene(root, 800, 700);
+        Scene scene = null;
+        if (root != null) {
+          scene = new Scene(root, 800, 700);
+        }
         scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         primaryStage.setScene(scene);
         View view = fxmlLoader.getController();
@@ -50,14 +57,20 @@ public class Main extends Application {
         Media movie = new Media(new File(path).toURI().toString());
         MediaPlayer temp=new MediaPlayer(movie);
         MediaView mediaV=new MediaView(temp);
-        AnchorPane anchorPane=new AnchorPane();
+        DoubleProperty mvw = mediaV.fitWidthProperty();
+        DoubleProperty mvh = mediaV.fitHeightProperty();
+        mvw.bind(Bindings.selectDouble(mediaV.sceneProperty(), "width"));
+        mvh.bind(Bindings.selectDouble(mediaV.sceneProperty(), "height"));
+        mediaV.setPreserveRatio(true);
+        s.setScene(new Scene(new Group(mediaV), 1500, 1000));
+        //AnchorPane anchorPane=new AnchorPane();
         temp.setAutoPlay(true);
-        s.setScene(new Scene(anchorPane, 1200, 700));
-        anchorPane.getChildren().add(mediaV);
+        //s.setScene(new Scene(anchorPane, 1200, 700));
+        //anchorPane.getChildren().add(mediaV);
         s.setTitle("Intro");
         s.setFullScreen(true);
         s.show();
-        PauseTransition delay = new PauseTransition(Duration.seconds(1));
+        PauseTransition delay = new PauseTransition(Duration.seconds(16));
         delay.setOnFinished( event -> {
             s.close();
             runMaze(primaryStage);
